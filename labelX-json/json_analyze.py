@@ -67,9 +67,9 @@ def bbox_det_analyse(json_lists):
     统计分析检测bbox信息
     '''
     labels = [bbox['class']
-              for bbox in json_list['label'][0]['data']
               for json_list in json_lists
-              if json_list['label']]
+              if json_list['label']
+              for bbox in json_list['label'][0]['data']]
     # 统计labels的类别信息
     print Counter(labels).most_common()
     
