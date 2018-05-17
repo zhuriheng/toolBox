@@ -7,22 +7,21 @@ import json
 import argparse
 
 '''
-actionFlag : 功能flag
-        1  : 从本地读取图片生成jsonlist
-            --inputImagesPath  图片保存地址 [required]
-            --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
-            --prefix  jsonlist中图片url的前缀 [optinal]
-            --nb_prefix -np 图片地址目录的级数 [optinal][default=1]
-            --output  输出文件, labels.json by default [optinal][default=labels.json]
-        2  : 将其他的json格式修改为labelX标准的json格式
-            根据个性化要求完成create_from_jsons()函数
-            --inputJsonList  输入的jsonlist文件 [required]
-            --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
-            --prefix  jsonlist中图片url的前缀 [optinal]
-            --output  optinal 输出文件, <infile>_labelX.json [optinal][default=labels.json]
-
 dataTypeFlag : 数据类型  cls 分类  det 检测 
 
+actionFlag : 功能flag
+    1  : 从本地读取图片生成jsonlist
+        --inputImagesPath  图片保存地址 [required]
+        --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
+        --prefix  jsonlist中图片url的前缀 [optinal]
+        --nb_prefix -np 图片地址目录的级数 [optinal][default=1]
+        --output  输出文件, labels.json by default [optinal][default=labels.json]
+    2  : 将其他的json格式修改为labelX标准的json格式
+        根据个性化要求完成create_from_jsons()函数
+        --inputJsonList  输入的jsonlist文件 [required]
+        --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
+        --prefix  jsonlist中图片url的前缀 [optinal]
+        --output  optinal 输出文件, <infile>_labelX.json [optinal][default=labels.json]
 '''
 
 
@@ -187,14 +186,6 @@ if __name__ == '__main__':
     main()
     print 'End ...'
 
-
-"""
-python json_tool_det.py \
---inputImagesPath /Users/zhuriheng/BK/Terror-Classify-Detect-V0.1-180507-zrh/ \
---output /Users/zhuriheng/BK/Terror-Classify-Detect-V0.1-180507-zrh/terror_cls_det_v0.1.json \
--np 2 \
---prefix http://oi7xsjr83.bkt.clouddn.com/terror_cls_det/V0.1/data/
-"""
 
 """
 # cifar10 test label

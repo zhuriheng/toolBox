@@ -10,10 +10,14 @@ import json
 from collections import Counter, defaultdict
 
 '''
-    解析json文件，并实现个性化的需求
+dataTypeFlag : 数据类型  cls 分类  det 检测 
+
+actionFlag : 功能flag
+    1: 统计jsonlist的类别（分类），bbox（检测）信息
         --input-json 输入的json文件 [required]
         --output-json 输出的json文件 <infile>_new.json by default
-        
+
+    2: 
 '''
 
 def load_json(file_path):
@@ -38,6 +42,10 @@ def write_to_file(json_lists, output):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='解析json文件，并实现个性化的需求')
+    parser.add_argument('--actionFlag', required=True,
+                        type=int, choices=[1, 2])
+    parser.add_argument('--dataTypeFlag', default=0, type=str, choices=['cls', 'det'],
+                        required=True, help="data type")
     parser.add_argument('--input-json', help='input json file', type=str)
     parser.add_argument('--output-json', help='output json file, <infile>_new.json by default', type=str)
     return parser.parse_args()
@@ -54,9 +62,21 @@ def generate_each_label_json(label_lists):
         write_to_json(label_lists[keys], output_name)
 
 
-def labels_analyse(json_lists):
+def bbox_det_analyse(json_lists):
     '''
-    统计分析labels信息，并返回各个类别的json list / url
+    统计分析检测bbox信息
+    '''
+    labels = [bbox['class']
+              for bbox in json_list['label'][0]['data']
+              for json_list in json_lists
+              if json_list['label']]
+    # 统计labels的类别信息
+    print Counter(labels).most_common()
+    
+
+def labels_cls_analyse(json_lists):
+    '''
+    统计分析分类labels信息，并返回各个类别的json list / url
     '''
     labels = [json_list['label'][0]['data'][0]['class'] \
             for json_list in json_lists
@@ -81,8 +101,12 @@ def main():
     output_json = args.output_json if args.output_json \
                     else "{}_new.json".format(os.path.splitext(args.input_json)[0])
     json_lists = load_json(input_json)
-    label_lists = labels_analyse(json_lists)
-    generate_each_label_json(label_lists)
+
+    if args.dataTypeFlag == 'cls':
+        label_lists = labels_analyse(json_lists)
+        generate_each_label_json(label_lists)
+    elif args.dataTypeFlag == 'det':
+        bbox_det_analyse(json_lists)
     pass
 
 if __name__ == '__main__':
