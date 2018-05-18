@@ -55,7 +55,11 @@ def make_labelX_json_cls(url=None, cls=None, dataset_label=None):
         "name": "terror" / "pulp" / "general"
         }]
     '''
-    label_json = {"data": [{"class": cls}], "version": "1",
+    if cls:
+        data = [{"class": cls}]
+    else:
+        data = []
+    label_json = {"data": data, "version": "1",
                   "type": "classification", "name": dataset_label}
     ava_json = {"url": url, "ops": "download()", "type": "image",
                 "label": [label_json]}
