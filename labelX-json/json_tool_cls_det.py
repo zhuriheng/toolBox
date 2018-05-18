@@ -21,7 +21,8 @@ actionFlag : 功能flag
         --inputJsonList  输入的jsonlist文件 [required]
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
         --prefix  jsonlist中图片url的前缀 [optinal]
-        --output  optinal 输出文件, <infile>_labelX.json [optinal][default=labels.json]
+        --output  optional 输出文件, <infile>_labelX.json [optinal][default=labels.json]
+        --label_is_None  optional 设置后所有的图片类别为空（用于labelx发包）[optinal][default=False]
 '''
 
 
@@ -140,7 +141,10 @@ def create_from_jsons():
                 url, dataset_label=args.dataset_label)
         elif args.dataTypeFlag == 'cls':
             # 需要修改cls部分
-            cls = input_json['class']
+            if not args.label_is_None:
+                cls = input_json['class']
+            else:
+                cls = None
             json_list = make_labelX_json_cls(
                 url, cls=cls, dataset_label=args.dataset_label)
         json_lists.append(json_list)
@@ -167,6 +171,10 @@ def parse_args():
                         help='prefix of url', default=None, type=str)
     parser.add_argument(
         '-np', '--nb_prefix', help='number of prefix, default = 1', default=1, type=int)
+    parser.add_argument(
+        '--label_is_None', help='optional 设置后所有的图片类别为空（用于labelx发包）', 
+        default=False, type=bool, choices=[True, False])
+    
     return parser.parse_args()
 
 args = parse_args()
