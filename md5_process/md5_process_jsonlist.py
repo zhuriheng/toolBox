@@ -52,8 +52,7 @@ class prod_worker(threading.Thread):
             line = buff.strip()
             temp = json.loads(line)
             url = temp['url']
-            image_name = url.split('images/')[-1]
-            file_tmp = image_name
+            file_tmp = url
 
             GLOBAL_LOCK.acquire()
             self.queue.put(file_tmp)
@@ -175,15 +174,14 @@ def get_categ(path):
             line = line.strip()
             temp = json.loads(line)
             url = temp['url']
-            image_name = url.split('images/')[-1]
             cate = temp['label'][0]['data']  # ['data'][0]['class']
             if cate:
                 labels = []
                 for c in cate:
                     labels.append(c['class'])
-                category[image_name] = list(set(labels))
+                category[url] = list(set(labels))
             else:
-                category[image_name] = ['normal']
+                category[url] = None
     return category
 
 
