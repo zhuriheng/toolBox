@@ -92,7 +92,7 @@ class prod_worker(threading.Thread):
             temp['url'] = buff.strip().split()[0]
             if self.use_basename:
                 temp['filename'] = os.path.join(
-                    args['--download-path'], os.path.basename(temp['url']))
+                    args['--download-path'], label, os.path.basename(temp['url']))
             else:
                 temp['filename'] = os.path.join(
                     args['--download-path'], FILE_NAME.format(label, args['--date'], i))
@@ -159,7 +159,41 @@ def filename_init():
         print('files will be saved as:', FILE_NAME.format(args['--date'], 0))
 
 
-def main():
+def create_folder_tree(root, categorys):
+    '''
+    创建层级目录结构
+    -- cls_root
+        -- test
+            -- 48_guns
+            -- 50_isis_flag
+            ...
+    '''
+    if not os.path.exists(root):
+        os.makedirs(root)
+
+    test_dir = os.path.join(root, 'test')
+    if not os.path.exists(test_dir):
+        os.makedirs(test_dir)
+
+    for (categ, index) in categorys.items():
+        for temp in [test_dir]:
+            #categ = '_'.join(categ.split(' '))
+            #categ_folder = str(index) + '_' + categ
+            label_dir = os.path.join(temp, categ)
+            if not os.path.exists(label_dir):
+                os.makedirs(label_dir)
+
+def main(): 
+    # labels的信息
+    categorys = {'0_bk_bloodiness_human': 0, '1_bk_bomb_fire': 1, '2_bk_bomb_smoke': 2,
+                 '3_bk_bomb_vehicle': 3, '4_bk_bomb_self-burning': 4, '5_bk_beheaded_isis': 5,
+                 '6_bk_beheaded_decollation': 6, '7_bk_march_banner': 7, '8_bk_march_crowed': 8,
+                 '9_bk_fight_police': 9, '10_bk_fight_person': 10, '11_sen_character': 11,
+                 '12_sen_masked': 12, '13_sen_army': 13, '14_sen_scene_person': 14,
+                 '15_sen_anime_likely_bloodiness': 15, '16_sen_anime_likely_bomb': 16, '17_sen_Islamic_dress': 17}
+    
+    create_folder_tree(args['--download-path'], categorys)
+
     infile = open(args['<infile>'], 'r')
     f2u = dict()
     u2f = dict()
