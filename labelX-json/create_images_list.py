@@ -117,7 +117,7 @@ def write_to_each_category(labels, categorys, portion=1.0):
                 f.write(tmp + ' ' + label_index)
                 f.write('\n')
 
-def write_to_total_list(labels, categorys, output ,portion=1.0, label=True):
+def write_to_total_list(labels, categorys, output ,portion=1.0, with_label=True):
     '''
     生成所有图片的index_list
     由于index list是有序的，训练时注意要shuffle
@@ -127,7 +127,9 @@ def write_to_total_list(labels, categorys, output ,portion=1.0, label=True):
             length = len(categorys[label])
             for i in range(int(length * portion)):
                 tmp = categorys[label][i]
-                if label:
+                if not args.suffix:
+                    tmp = os.path.splitext(tmp)[0]
+                if with_label:
                     label_index = label.split('_')[0]
                     f.write(tmp + ' ' + label_index + '\n')
                 else:
@@ -147,7 +149,7 @@ def main():
 
     elif actionFlag == 2:
         print "create image list without label index from local images"
-        write_to_total_list(labels, categorys, args.output, label=False)
+        write_to_total_list(labels, categorys, args.output, with_label=False)
 
 if __name__ == '__main__':
     print "Start processing"
