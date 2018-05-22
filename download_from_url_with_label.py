@@ -95,7 +95,7 @@ class prod_worker(threading.Thread):
                     args['--download-path'], label, os.path.basename(temp['url']))
             else:
                 temp['filename'] = os.path.join(
-                    args['--download-path'], FILE_NAME.format(label, args['--date'], i))
+                    args['--download-path'], label, FILE_NAME.format(args['--date'], i))
             self.f2u[os.path.basename(temp['filename'])] = temp['url']
             self.u2f[temp['url']] = os.path.basename(temp['filename'])
             GLOBAL_LOCK.acquire()
@@ -153,7 +153,7 @@ def filename_init():
     global FILE_NAME
     args['--prefix'] = "" if not args['--prefix'] else args['--prefix']
     args['--suffix'] = "" if not args['--suffix'] else args['--suffix']
-    FILE_NAME = args['--prefix'] + '{}_{}_{:0>8}' + \
+    FILE_NAME = args['--prefix'] + '{}_{:0>8}' + \
         args['--suffix'] + '.' + args['--ext']
     if not args['--basename']:
         #print('files will be saved as:', FILE_NAME.format(args['--date'], 0))
