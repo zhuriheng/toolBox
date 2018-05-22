@@ -13,12 +13,12 @@ import argparse
 actionFlag : 功能flag
     1  : 从本地读取图片生成image list + index
         --root  图片地址根目录 [required]
-        --output  输出文件, labels.json by default [optional][default=labels.json]
+        --output  输出文件, <root>/images.lst by default [optional][default=<root>/images.lst]
         --nb_prefix -np 图片地址目录的级数 [optional][default=2]
 
     2  : 从本地读取图片生成image list 
         --root  图片地址根目录 [required]
-        --output  输出文件, labels.json by default [optional][default=labels.json]
+        --output  输出文件, <root>/images.lst by default [optional][default=<root>/images.lst]
         --nb_prefix -np 图片地址目录的级数 [optional][default=2]
         --suffix 是否添加suffix [optional][default=True]
 '''
@@ -135,7 +135,6 @@ def write_to_total_list(labels, categorys, output ,portion=1.0, with_label=True)
                 else:
                     f.write(tmp + '\n')
 
-
 args = parse_args()
 def main():
     actionFlag = args.actionFlag
@@ -143,13 +142,15 @@ def main():
 
     allImageList, labels = tarverse(args.root) 
     categorys = generate_with_labels(allImageList, labels)
+    output = args.output if args.output else os.path.join(args.root, 'images.lst')
+
     if actionFlag == 1:
         print "create image list with label index from local images"
-        write_to_total_list(labels, categorys, args.output)
+        write_to_total_list(labels, categorys, output)
 
     elif actionFlag == 2:
         print "create image list without label index from local images"
-        write_to_total_list(labels, categorys, args.output, with_label=False)
+        write_to_total_list(labels, categorys, output, with_label=False)
 
 if __name__ == '__main__':
     print "Start processing"
