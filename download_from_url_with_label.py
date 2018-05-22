@@ -156,7 +156,8 @@ def filename_init():
     FILE_NAME = args['--prefix'] + '{}_{}_{:0>8}' + \
         args['--suffix'] + '.' + args['--ext']
     if not args['--basename']:
-        print('files will be saved as:', FILE_NAME.format(args['--date'], 0))
+        #print('files will be saved as:', FILE_NAME.format(args['--date'], 0))
+        pass
 
 
 def create_folder_tree(root, categorys):
