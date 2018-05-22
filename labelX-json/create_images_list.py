@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument(
         '-np', '--nb_prefix', help='number of prefix, default=2', default=2, type=int)
     parser.add_argument(
-        '--suffix', help='whether to add suffix, default=True', default=True, choices=[True, False])
+        '--suffix', help='whether to add suffix, add --suffix for True  ', action='store_true')
     #parser.add_argument('--mode', choices=[1, 2], default=1, type=int,
     #                    help='mode 1: generate total index; 2: generate index for each category, default = 1')
     #parser.add_argument('-s','--sort', help='whether sort index', action='store_true')
