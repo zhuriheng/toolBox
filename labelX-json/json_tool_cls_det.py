@@ -13,20 +13,20 @@ actionFlag : 功能flag
     1  : 从本地读取图片生成jsonlist
         --inputImagesPath  图片保存地址 [required]
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
-        --prefix  jsonlist中图片url的前缀 [optinal]
-        --nb_prefix -np 图片地址目录的级数 [optinal][default=1]
-        --output  输出文件, labels.json by default [optinal][default=labels.json]
+        --prefix  jsonlist中图片url的前缀 [optional]
+        --nb_prefix -np 图片地址目录的级数 [optional][default=1]
+        --output  输出文件, labels.json by default [optional][default=labels.json]
     2  : 将其他的json格式修改为labelX标准的json格式
         根据个性化要求完成create_from_jsons()函数
         --inputJsonList  输入的jsonlist文件 [required]
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
-        --prefix  jsonlist中图片url的前缀 [optinal]
-        --output  optional 输出文件, <infile>_labelX.json [optinal][default=labels.json]
-        --label_is_None  optional 设置后所有的图片类别为空（用于labelx发包）[optinal][default=False]
+        --prefix  jsonlist中图片url的前缀 [optional]
+        --output  optional 输出文件, <infile>_labelX.json [optional][default=labels.json]
+        --label_is_None  optional 设置后所有的图片类别为空（用于labelx发包）[optional][default=False]
 '''
 
 
-def make_labelX_json_det(url=None, dataset_label='detect'):
+def make_labelX_json_det(url=None, dataset_label=' detect'):
     '''
     url, type, <source_url>, <ops>, 
     label:

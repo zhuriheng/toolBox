@@ -9,20 +9,40 @@ from __future__ import with_statement
 import os
 import argparse
 
+'''
+actionFlag : 功能flag
+    1  : 从本地读取图片生成image list + index
+        --root  图片地址根目录 [required]
+        --output  输出文件, labels.json by default [optional][default=labels.json]
+        --nb_prefix -np 图片地址目录的级数 [optional][default=2]
+
+    2  : 从本地读取图片生成image list 
+        --root  图片地址根目录 [required]
+        --output  输出文件, labels.json by default [optional][default=labels.json]
+        --nb_prefix -np 图片地址目录的级数 [optional][default=2]
+        --suffix 是否添加suffix [optional][default=True]
+'''
+
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Traverse the folder and generate the index')
+    parser.add_argument('--actionFlag', required=True,
+                        type=int, choices=[1, 2])
     parser.add_argument('--root', 
                         help='root path', default=None, type=str)
     parser.add_argument('--output', 
                         help='output file name', type=str)
-    parser.add_argument('--mode', help='mode 1: generate total index; 2: generate index for each category, default = 1',
-                        choices=[1, 2], default = 1, type=int)
     parser.add_argument(
-        '-np', '--nb_prefix', help='number of prefix, default = 4', default=4, type=int)
-    parser.add_argument('-s','--sort', help='whether sort index', action='store_true')
+        '-np', '--nb_prefix', help='number of prefix, default=2', default=2, type=int)
     parser.add_argument(
-        '--portion',  help='float variable, the portion of images choosen, like 0.3, default = 1.0,', default=1.0, type=float)
+        '--suffix', help='whether to add suffix, default=True', default=True, choices=[True, False])
+    #parser.add_argument('--mode', choices=[1, 2], default=1, type=int,
+    #                    help='mode 1: generate total index; 2: generate index for each category, default = 1')
+    #parser.add_argument('-s','--sort', help='whether sort index', action='store_true')
+    #parser.add_argument(
+    #    '--portion',  help='float variable, the portion of images choosen, like 0.3, default = 1.0,', default=1.0, type=float)
     return parser.parse_args()
 
 
@@ -50,7 +70,6 @@ def tarverse(path):
                 print("%s isn't image"%(imagePathName))
     return allImageList, labels
 
-
 def generate_with_labels(allImageList, labels, sort=None):
     '''
     将每个类别的图片分别存储在一个dict中
@@ -69,7 +88,7 @@ def generate_with_labels(allImageList, labels, sort=None):
             print "Error, not right label info for %s" % (imageList)
         else:
             categorys[lab].append(tmp)
-    
+    '''
     if sort:
         # 提取出每张图片的index序号
         for label in labels:
@@ -80,7 +99,7 @@ def generate_with_labels(allImageList, labels, sort=None):
                 prefix.append(nb_prefix)
             categorys[label] = [x for _, x in sorted(
                                 zip(prefix, categorys[label]), key=lambda pair: pair[0])]
-
+    '''
     return categorys
 
 def write_to_each_category(labels, categorys, portion=1.0):
@@ -99,38 +118,39 @@ def write_to_each_category(labels, categorys, portion=1.0):
                 f.write(tmp + ' ' + label_index)
                 f.write('\n')
 
-def write_to_total_list(labels, categorys, output ,portion=1.0):
+def write_to_total_list(labels, categorys, output ,portion=1.0, label=True):
     '''
     生成所有图片的index_list
     由于index list是有序的，训练时注意要shuffle
     '''
-    #filename = 'total.lst'
-    #filename = os.path.join(args.output, filename)
-    filename = output
-    print "Start: Total index list"
-    with open(filename, 'w') as f:
+    with open(output, 'w') as f:
         for label in labels:
             length = len(categorys[label])
             for i in range(int(length * portion)):
                 tmp = categorys[label][i]
-                label_index = label.split('_')[0]
-                f.write(tmp + ' ' + label_index)
-                f.write('\n')
+                if label:
+                    label_index = label.split('_')[0]
+                    f.write(tmp + ' ' + label_index + '\n')
+                else:
+                    f.write(tmp + '\n')
 
+
+args = parse_args()
 def main():
-    allImageList, labels = tarverse(args.root)
-    categorys = generate_with_labels(allImageList, labels, args.sort)
+    actionFlag = args.actionFlag
+    print '--------' * 8
 
-    write_to_each_category(labels, categorys, args.portion)
-    write_to_total_list(labels, categorys, args.output, args.portion)
+    allImageList, labels = tarverse(args.root) 
+    categorys = generate_with_labels(allImageList, labels)
+    if actionFlag == 1:
+        print "create image list with label index from local images"
+        write_to_total_list(labels, categorys, args.output)
+
+    elif actionFlag == 2:
+        print "create image list without label index from local images"
+        write_to_total_list(labels, categorys, args.output, label=False)
 
 if __name__ == '__main__':
-    args = parse_args()
     print "Start processing"
-    allImageList, labels = tarverse(args.root)
-    categorys = generate_with_labels(allImageList, labels, args.sort)
-    if args.mode == 1:
-        write_to_total_list(labels, categorys, args.output, args.portion)
-    else:
-        write_to_each_category(labels, categorys, args.portion)
+    main()
     print "...done"
