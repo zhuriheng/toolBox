@@ -31,7 +31,7 @@ def parse_args():
                         type=int, choices=[1, 2])
     parser.add_argument('--root', 
                         help='root path', default=None, type=str)
-    parser.add_argument('--output', default='images.lst'，
+    parser.add_argument('--output', default='images.lst',
                         help='output file name', type=str)
     parser.add_argument(
         '-np', '--nb_prefix', help='number of prefix, default=2', default=2, type=int)
