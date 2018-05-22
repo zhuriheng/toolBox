@@ -23,16 +23,15 @@ actionFlag : 功能flag
         --suffix 是否添加suffix [optional][default=True]
 '''
 
-
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Traverse the folder and generate the index')
     parser.add_argument('--actionFlag', required=True,
+                        help = '1: create image list with label index; 2: without label index', 
                         type=int, choices=[1, 2])
     parser.add_argument('--root', 
                         help='root path', default=None, type=str)
-    parser.add_argument('--output', 
+    parser.add_argument('--output', default='images.lst'
                         help='output file name', type=str)
     parser.add_argument(
         '-np', '--nb_prefix', help='number of prefix, default=2', default=2, type=int)
