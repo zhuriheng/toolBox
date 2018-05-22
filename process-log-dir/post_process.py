@@ -38,6 +38,20 @@ def merge_file(filenames, output):
                     outfile.write(line)
     
 
+def merge_filter_file(filenames, output, threshold):
+    '''
+    concatenate text files
+    '''
+    with open(output, 'w') as outfile:
+        for fname in filenames:
+            print "merge %s" % (fname)
+            json_fname = load_json(fname)
+            filter_results = filter(json_fname, threshold)
+            for json_list in filter_results:
+                json.dump(json_list, outfile)  # 不使用indent
+                outfile.write('\n')
+
+
 def load_json(file_path):
     with open(file_path, 'r') as f:
         json_lists = [json.loads(line) for line in f]
@@ -89,19 +103,22 @@ def parse_args():
 args = parse_args()
 def main():
     path = args.dataPath
-    output = args.output if args.output else '{}_results.json'.format(os.path.join(args.dataPath, args.dataPath.split('/')[-1]))
+    output = args.output if args.output else '{}_results.json'.format(
+        os.path.join(args.dataPath, os.path.dirname(args.dataPath).split('/')[-1]))
 
     filenames = get_file_list(path, args.num, args.gpuNumber)
-    merge_file(filenames, output)
-    
-    results = load_json(output)
-    filter_result = filter(results, args.threshold)
-    output_thresh = args.output if args.output else '{}_results_threshold.json'.format(
-        os.path.join(args.dataPath, args.dataPath.split('/')[-1]))
 
-    write_to_json(filter_result, output_thresh)
+    #merge_file(filenames, output)
+    #results = load_json(output)
+    #filter_result = filter(results, args.threshold)
+    output_thresh = args.output if args.output else '{}_results_threshold_{}.json'.format(
+        os.path.join(args.dataPath, os.path.dirname(args.dataPath).split('/')[-1]), str(args.threshold))
+    merge_filter_file(filenames, output_thresh, args.threshold)
+
+    #write_to_json(filter_result, output_thresh)
 
 if __name__ == '__main__':
     print 'Start processing'
     main()
     print 'End ...'
+
