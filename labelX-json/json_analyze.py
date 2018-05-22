@@ -103,7 +103,7 @@ def main():
     json_lists = load_json(input_json)
 
     if args.dataTypeFlag == 'cls':
-        label_lists = labels_analyse(json_lists)
+        label_lists = labels_cls_analyse(json_lists)
         generate_each_label_json(label_lists)
     elif args.dataTypeFlag == 'det':
         bbox_det_analyse(json_lists)
