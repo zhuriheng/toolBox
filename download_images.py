@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 # created 2018/05/12 @Riheng
-# 下载图谱
+# 下载图片
 
 import os
 import argparse
@@ -53,7 +53,7 @@ def get_url_label(json_lists):
     for json_list in json_lists:
         if json_list['label'] and json_list['label'][0]['data']:
             url = json_list['url']
-            label = json_list['label'][0]['data'][0]['class']
+            label = json_list['label'][0]['data'][0]['class'][0] # 临时性修改
             result[url] = label
     return result
 
@@ -69,7 +69,7 @@ def download(url, output_path, err_num):
     return err_num
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='解析json文件，并实现个性化的需求')
+    parser = argparse.ArgumentParser(description='解析json文件，下载图片')
     parser.add_argument('--input-json', help='input json file', type=str)
     parser.add_argument('--download-path', help='download images path', type=str)
     return parser.parse_args()
@@ -93,7 +93,7 @@ def main():
     result = get_url_label(json_lists)
     
     err_num = 0
-    for (url, label) in result.values():
+    for (url, label) in result.items():
         filename = url.split('/')[-1]
         output_path = os.path.join(args.download_path, 'test', label, filename)
         download(url, output_path, err_num)
