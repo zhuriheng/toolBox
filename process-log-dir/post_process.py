@@ -71,7 +71,7 @@ def filter(results, threshold):
     for result in results:
         index = int(result.values()[0]['Top-1 Index'])
         prob = result.values()[0]['Confidence'][index]
-        if index <= 17:
+        if index <= args.index:
             if threshold <= float(prob):
                 url = result.values()[0]['File Name']
                 cls = result.values()[0]['Top-1 Class']
