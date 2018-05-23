@@ -82,9 +82,10 @@ def main():
     categorys = {'0_bk_bloodiness_human': 0, '1_bk_bomb_fire': 1, '2_bk_bomb_smoke': 2,
                  '3_bk_bomb_vehicle': 3, '4_bk_bomb_self-burning': 4, '5_bk_beheaded_isis': 5,
                  '6_bk_beheaded_decollation': 6, '7_bk_march_banner': 7, '8_bk_march_crowed': 8,
-                 '9_bk_fight_police': 9, '10_bk_fight_person': 10, '11_sen_character': 11,
-                 '12_sen_masked': 12, '13_sen_army': 13, '14_sen_scene_person': 14,
-                 '15_sen_anime_likely_bloodiness': 15, '16_sen_anime_likely_bomb': 16, '17_sen_Islamic_dress': 17}
+                 '9_bk_fight_police': 9, '10_bk_fight_person': 10}
+                 # '11_sen_character': 11,
+                 #'12_sen_masked': 12, '13_sen_army': 13, '14_sen_scene_person': 14,
+                 #'15_sen_anime_likely_bloodiness': 15, '16_sen_anime_likely_bomb': 16, '17_sen_Islamic_dress': 17}
 
     create_folder_tree(args.download_path, categorys)
 
