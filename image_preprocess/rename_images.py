@@ -9,11 +9,12 @@ import argparse
 import hashlib
 import json
 import cv2
+import numpy as np
 
 from collections import defaultdict
 
 '''
-修改图片的名字,统一名字为 "label_date_index.jpg”,并且去除坏图
+修改图片的名字,统一名字为 "prefix_date_index_suffix.jpg”,并且去除坏图
     --inputImagesPath 图片存储路径 [required]
     --date 时间  [default: 1234]
     --prefix 图片前缀，默认为label的名字
@@ -23,7 +24,7 @@ from collections import defaultdict
 
 def parse_args():
     parser = argparse.ArgumentParser(description="md5 process check image")
-    parser.add_argument('--inputImagesPath', type=str, requried=True)
+    parser.add_argument('--inputImagesPath', type=str, required=True)
     parser.add_argument('--date', type=str, default='1234',help='time')
     parser.add_argument('--prefix', type=str, help='图片前缀，默认为label的名字')
     parser.add_argument('--suffix', type=str, help='图片后缀')
@@ -32,9 +33,14 @@ def parse_args():
 
 
 def checkValidImages(filePath):
-    if cv2.imread(filePath):
-        return True
-    return False
+    try:
+        img = cv2.imread(filePath)
+    except:
+        img = None
+    if np.shape(img) == ():
+        print("ERROR INFO : %s can't read" % (filePath))
+        return False
+    return True
 
 
 def checkFileIsImages(filePath):
