@@ -69,9 +69,9 @@ def write_to_json(json_lists, output):
 def filter(results, threshold):
     json_lists = []
     for result in results:
-        index = int(result.values()[0]['Top-1 Index'])
-        prob = result.values()[0]['Confidence'][index]
-        if index <= args.index:
+        ind = int(result.values()[0]['Top-1 Index'])
+        prob = result.values()[0]['Confidence'][ind]
+        if ind <= args.index:
             if threshold <= float(prob):
                 url = result.values()[0]['File Name']
                 cls = result.values()[0]['Top-1 Class']
