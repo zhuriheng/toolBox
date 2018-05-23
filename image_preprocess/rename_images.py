@@ -16,6 +16,7 @@ from collections import defaultdict
 '''
 修改图片的名字,统一名字为 "prefix_date_index_suffix.jpg”,并且去除坏图
     --inputImagesPath 图片存储路径 [required]
+    --rename set "--rename" to start rename image
     --date 时间  [default: 1234]
     --prefix 图片前缀，默认为label的名字
     --suffix 图片后缀
@@ -25,10 +26,11 @@ from collections import defaultdict
 def parse_args():
     parser = argparse.ArgumentParser(description="md5 process check image")
     parser.add_argument('--inputImagesPath', type=str, required=True)
-    parser.add_argument('--date', type=str, default='1234',help='time')
+    parser.add_argument('--rename', action='store_true', help='set "--rename" to rename image')
+    parser.add_argument('--date', type=str, default='1234',help='time, "1234" by default')
     parser.add_argument('--prefix', type=str, help='图片前缀，默认为label的名字')
     parser.add_argument('--suffix', type=str, help='图片后缀')
-    parser.add_argument('--ext', type=str, default='jpg', help='图片的格式')
+    parser.add_argument('--ext', type=str, default='jpg', help='图片的格式, "jpg" by default')
     return parser.parse_args()
 
 
@@ -74,7 +76,9 @@ def getAllImagesWithGroup(basePath=None):
         for file in filenames:
             imagePathName = os.path.join(parent, file)
             if checkFileIsImages(imagePathName) and checkValidImages(imagePathName):
-                allImageListWithGroup[dirnames].append(imagePathName)
+                dir = os.path.split(imagePathName)[1]
+                label = dir.split('/')[-1]
+                allImageListWithGroup[label].append(imagePathName)
             else:
                 # print("%s isn't image"%(imagePathName))
                 pass
@@ -84,7 +88,8 @@ def getAllImagesWithGroup(basePath=None):
 def rename_image(original_name, new_name):
     cmdStr = "mv %s %s" % (original_name, new_name)
     print cmdStr
-    result_flag = os.system(cmdStr)
+    if args.rename:
+        result_flag = os.system(cmdStr)
 
 
 def rename_process_with_label(allImageListWithGroup, date, prefix, suffix, ext):
