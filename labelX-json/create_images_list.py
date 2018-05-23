@@ -63,6 +63,13 @@ def tarverse(path):
             labels = dirnames
         for file in filenames:
             imagePathName = os.path.join(parent, file)
+            #临时更改
+            if imagePathName[-2:] == '==':
+                newImagePathName = imagePathName + '.jpg'
+                cmdStr = "mv %s %s" % (imagePathName, newImagePathName)
+                print cmdStr
+                #result_flag = os.system(cmdStr)
+
             if checkFileIsImags(imagePathName):
                 allImageList.append(imagePathName)
             else:

@@ -95,6 +95,8 @@ def main():
     err_num = 0
     for (url, label) in result.items():
         filename = url.split('/')[-1]
+        if filename.split('.')[-1] != 'jpg':
+            filename = filename + '.jpg'
         output_path = os.path.join(args.download_path, 'test', label, filename)
         download(url, output_path, err_num)
     print 'Total error num:' + str(err_num)
