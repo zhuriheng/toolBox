@@ -80,14 +80,20 @@ class cons_worker(threading.Thread):
 
     def get_qhash(self, url, alg, err_num):
         req = '{}?qhash/{}'.format(url, alg)
-        ret = requests.get(req)
-        if ret.status_code != 200:
-            # raise request_err
+        try:
+            ret = requests.get(req)
+        except requests.ConnectionError:
             print('return error:', req)
             err_num += 1
             return None, err_num
         else:
-            return json.loads(ret.text), err_num
+            if ret.status_code != 200:
+                # raise request_err
+                print('return error:', req)
+                err_num += 1
+                return None, err_num
+            else:
+                return json.loads(ret.text), err_num
 
     def run(self):
         global ERROR_NUMBER
