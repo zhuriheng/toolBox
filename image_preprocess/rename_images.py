@@ -76,7 +76,7 @@ def getAllImagesWithGroup(basePath=None):
         for file in filenames:
             imagePathName = os.path.join(parent, file)
             if checkFileIsImages(imagePathName) and checkValidImages(imagePathName):
-                dir = os.path.split(imagePathName)[1]
+                dir = os.path.split(imagePathName)[0]
                 label = dir.split('/')[-1]
                 allImageListWithGroup[label].append(imagePathName)
             else:
@@ -98,9 +98,8 @@ def rename_process_with_label(allImageListWithGroup, date, prefix, suffix, ext):
         for imagePath in allImageListWithGroup[label]:
             path_prefix = os.path.split(imagePath)[0]
             prefix = label
-            new_name = prefix + '_{}_{:0>8}' + \
-                suffix + '.' + ext
-            new_name.format(date, num)
+            new_name = (prefix + '_{}_{:0>8}' + \
+                        suffix + '.' + ext).format(date, num)
             num += 1
             rename_image(imagePath, os.path.join(path_prefix, new_name))
 
