@@ -260,14 +260,17 @@ def main():
             if val['md5'] not in hash_depots:
                 if args.prefix:
                     url = args.prefix + url
-                array = make_labelX_json_cls(url=url, cls=category[url], dataset_label=args.dataset_label)
+                array = make_labelX_json_cls(url=url, cls=category[url][0], dataset_label=args.dataset_label)
                 json_array.append(array)
                 hash_depots.append(val['md5'])
             else:
                 print("duplication image: " + url)
-                
     write_to_json(json_array, output)
 
+    print("Images number: %d" % (len(hash_dic.keys())))
+    print("duplication images number: %d " %
+          (len(hash_dic.keys()) - len(json_array)))
+    print("Images number after deduplication: %d " % (len(json_array)))
 
 if __name__ == '__main__':
     print("Start md5 processing:")

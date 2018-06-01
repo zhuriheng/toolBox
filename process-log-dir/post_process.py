@@ -13,7 +13,7 @@ from collections import Counter
 将多线程多进程推理的1000份结果整合在一起，输出各个类别的统计信息
     
         --root  数据根目录 [required]
-        --output   输出的json list，set <root name>_result.json by default [optional]
+        --output   输出的json list，set result/<root name>_thres.json by default [optional]
         --num  分割任务的数量，1000 by default [required][default=1000]
         --gpuNumber  推理是gpu的数量， 4 by default [required][default=4]
         --threshold  模型阈值，0.9 by default [required][default=0.9]
@@ -111,13 +111,14 @@ def labels_cls_analyse(json_lists):
               for json_list in json_lists
               if json_list['label']]
     # 统计labels的类别信息
+    print "Total number: %d" % (len(json_lists))
     print Counter(labels).most_common()
 
 # 使用argparse
 def parse_args():
     parser = argparse.ArgumentParser(description="将多线程多进程推理的1000份结果整合在一起")
     parser.add_argument('--root', required=True,type=str)
-    parser.add_argument('--output', type=str, help = 'set <root name>_result.json by default')
+    parser.add_argument('--output', type=str, help = 'set result/<root name>_thres.json by default')
     parser.add_argument('--num', type=int, default=1000)
     parser.add_argument('--gpuNumber', type=int, default=4)
     parser.add_argument('--threshold', type=float, default=0.9, help='model threshold')
@@ -127,8 +128,11 @@ def parse_args():
 args = parse_args()
 def main():
     filenames = get_file_list(args.root, args.num, args.gpuNumber)
-    output_thresh = args.output if args.output else '{}_results_threshold_{}.json'.format(
-        os.path.join(args.root, os.path.dirname(args.root).split('/')[-1]), str(args.threshold))
+    path = os.path.join(args.root, 'result')
+    if not os.path.exists(path):
+        os.mkdir(path)
+    output_thresh = args.output if args.output else '{}_thres_{}.json'.format(
+        os.path.join(path, os.path.dirname(path).split('/')[-1]), str(args.threshold))
     # 在阈值筛选下，合并文件
     merge_filter_file(filenames, output_thresh, args.threshold)
     # 统计类别信息

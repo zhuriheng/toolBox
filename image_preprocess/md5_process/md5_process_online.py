@@ -2,10 +2,6 @@
 # created 2018/04/02 @Riheng
 # get md5 of online images
 
-# TODO:
-# 针对线程中断的两个问题更新代码
-#   1. 连接超时
-#   2. 进程退出错误 
 
 
 from __future__ import print_function  # 引入python3中的print()函数
