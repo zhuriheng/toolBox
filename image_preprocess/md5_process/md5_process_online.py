@@ -80,20 +80,14 @@ class cons_worker(threading.Thread):
 
     def get_qhash(self, url, alg, err_num):
         req = '{}?qhash/{}'.format(url, alg)
-        try:
-            ret = requests.get(req)
-        except requests.ConnectionError:
+        ret = requests.get(req, timeout=10)
+        if ret.status_code != 200:
+            # raise request_err
             print('return error:', req)
             err_num += 1
             return None, err_num
         else:
-            if ret.status_code != 200:
-                # raise request_err
-                print('return error:', req)
-                err_num += 1
-                return None, err_num
-            else:
-                return json.loads(ret.text), err_num
+            return json.loads(ret.text), err_num
 
     def run(self):
         global ERROR_NUMBER
@@ -110,8 +104,13 @@ class cons_worker(threading.Thread):
                 else:
                     url_tmp = file_tmp
                 for hash_alg in self.hash_alg_list:
-                    result, err_num = self.get_qhash(
-                        url_tmp, hash_alg, err_num)
+                    try:
+                        result, err_num = self.get_qhash(url_tmp, hash_alg, err_num)
+                    except requests.exceptions.ConnectionError:
+                        GLOBAL_LOCK.acquire()
+                        self.queue.put(file_tmp)
+                        GLOBAL_LOCK.release()
+                        break
                     if result:
                         GLOBAL_LOCK.acquire()
                         self.hash_dic[file_tmp][hash_alg] = result['hash']
@@ -205,13 +204,13 @@ def md5(infile, thread_count, prefix):
 def main():
     args = parse_args()
     # 读取参数
-    infile = open(args.src, 'r')
     output = args.output if args.output else '{}_hash.json'.format(
         os.path.splitext(args.src)[0])
     thread_count = args.thread_number
     prefix = args.prefix
 
-    hash_dic = md5(infile, thread_count, prefix)
+    with open(args.src, 'r') as infile:
+        hash_dic = md5(infile, thread_count, prefix)
 
     category = get_categ(args.src)
     json_array = []
