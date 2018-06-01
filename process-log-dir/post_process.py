@@ -7,6 +7,19 @@ import os
 import json
 import argparse
 
+from collections import Counter
+
+'''
+将多线程多进程推理的1000份结果整合在一起，输出各个类别的统计信息
+    
+        --root  数据根目录 [required]
+        --output   输出的json list，set <root name>_result.json by default [optional]
+        --num  分割任务的数量，1000 by default [required][default=1000]
+        --gpuNumber  推理是gpu的数量， 4 by default [required][default=4]
+        --threshold  模型阈值，0.9 by default [required][default=0.9]
+        --index 模型类别，目前只支持根据index的范围选择类别 [required][default=17]
+'''
+
 
 def make_labelX_json_cls(url=None, cls=None, dataset_label='terror'):
     '''
@@ -89,11 +102,22 @@ def get_file_list(path, num, gpuNumber):
                 filenames.append(filename)
     return filenames
 
+
+def labels_cls_analyse(json_lists):
+    '''
+    统计分析分类labels信息，并返回各个类别的json list / url
+    '''
+    labels = [json_list['label'][0]['data'][0]['class']
+              for json_list in json_lists
+              if json_list['label']]
+    # 统计labels的类别信息
+    print Counter(labels).most_common()
+
 # 使用argparse
 def parse_args():
-    parser = argparse.ArgumentParser(description="生成图片分类和检测的jsonlist")
-    parser.add_argument('--dataPath', required=True,type=str)
-    parser.add_argument('--output', type=str, help = 'set <infile>_result.json by default')
+    parser = argparse.ArgumentParser(description="将多线程多进程推理的1000份结果整合在一起")
+    parser.add_argument('--root', required=True,type=str)
+    parser.add_argument('--output', type=str, help = 'set <root name>_result.json by default')
     parser.add_argument('--num', type=int, default=1000)
     parser.add_argument('--gpuNumber', type=int, default=4)
     parser.add_argument('--threshold', type=float, default=0.9, help='model threshold')
@@ -102,20 +126,14 @@ def parse_args():
 
 args = parse_args()
 def main():
-    path = args.dataPath
-    output = args.output if args.output else '{}_results.json'.format(
-        os.path.join(args.dataPath, os.path.dirname(args.dataPath).split('/')[-1]))
-
-    filenames = get_file_list(path, args.num, args.gpuNumber)
-
-    #merge_file(filenames, output)
-    #results = load_json(output)
-    #filter_result = filter(results, args.threshold)
+    filenames = get_file_list(args.root, args.num, args.gpuNumber)
     output_thresh = args.output if args.output else '{}_results_threshold_{}.json'.format(
-        os.path.join(args.dataPath, os.path.dirname(args.dataPath).split('/')[-1]), str(args.threshold))
+        os.path.join(args.root, os.path.dirname(args.root).split('/')[-1]), str(args.threshold))
+    # 在阈值筛选下，合并文件
     merge_filter_file(filenames, output_thresh, args.threshold)
-
-    #write_to_json(filter_result, output_thresh)
+    # 统计类别信息
+    json_lists = load_json(output_thresh)
+    labels_cls_analyse(json_lists)
 
 if __name__ == '__main__':
     print 'Start processing'

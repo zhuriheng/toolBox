@@ -229,7 +229,7 @@ def parse_args():
         '-p', '--prefix', help='add url prefix if needed', type=str)
     parser.add_argument(
         '-o', '--output',
-        help='output json file path, will be saved as <infile>_hash.json path by default',
+        help='output json file path, will be saved as <infile>_rm_dup.json path by default',
         type=str)
     parser.add_argument(
         '--hash_alg',
