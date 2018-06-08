@@ -10,23 +10,32 @@ import argparse
 dataTypeFlag : 数据类型  cls 分类  det 检测 
 
 actionFlag : 功能flag
-    1  : 从本地读取图片生成jsonlist
+    1  : 从本地读取图片生成类别信息为空的jsonlist，主要用于标注发包
         --inputImagesPath  图片保存地址 [required]
+        --nb_prefix -np 图片地址目录的级数 [optional][default=1]
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
         --prefix  jsonlist中图片url的前缀 [optional]
-        --nb_prefix -np 图片地址目录的级数 [optional][default=1]
-        --output  输出文件, labels.json by default [optional][default=labels.json]
+        --output  optional 输出文件, <infile>_labelX.json [optional][default=labels.json]
+        --label_is_None  optional [default=False]
+            a. 设置后图片类别为空（用于labelx发包）
+            b. 若不设置，需要提供图片的类别信息，图片名/类别名，图片list
+        --label_from_imgname optional [default=False]
+            a. 设置后从图片名获取label信息，根据实际情况修改get_label_from_imgname(imgname)函数
+            b. 若不设置，需提供labels.csv 以及images.lst文件
+        --labels  类别信息，包含类别名以及对应的index 的labels.lst文件 [optional]
+        --index_list  图片的index list，包含图片名以及对应的类别index  [optional]
+
     2  : 将其他的json格式修改为labelX标准的json格式
         根据个性化要求完成create_from_jsons()函数
         --inputJsonList  输入的jsonlist文件 [required]
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
         --prefix  jsonlist中图片url的前缀 [optional]
-        --output  optional 输出文件, <infile>_labelX.json [optional][default=labels.json]
+        --output  optional 输出文件, <infile>_new.json [optional][default=labels.json]
         --label_is_None  optional 设置后所有的图片类别为空（用于labelx发包）[optional][default=False]
 '''
 
 
-def make_labelX_json_det(url=None, dataset_label=' detect'):
+def make_labelX_json_det(url=None, data=[], dataset_label='detect'):
     '''
     url, type, <source_url>, <ops>, 
     label:
@@ -37,7 +46,7 @@ def make_labelX_json_det(url=None, dataset_label=' detect'):
         "name": "detect"
         }]
     '''
-    label_json = {"data": [], "version": "1",
+    label_json = {"data": data, "version": "1",
                   "type": "detection", "name": dataset_label}
     ava_json = {"url": url, "ops": "download()", "type": "image",
                 "label": [label_json]}
@@ -103,6 +112,31 @@ def getAllImages(basePath=None):
                 pass
     return allImageList
 
+def get_label_from_labelfile(imgname):
+    '''
+    获得图片的label信息
+    '''
+    label = None
+    return label
+
+
+def get_label_from_imgname(imgname):
+    '''
+    获得图片的label信息
+    '''
+    label = imgname.split('_0227_')[0]
+    return label
+
+def request_label(cls=None, index=None):
+    if not cls:  # cls为空，没有类别信息，返回True
+        return True
+    else:
+        id = index if index else int(cls.split('_')[0])
+        if id <= 100:
+            return True
+        else:
+            return False
+
 def create_from_images():
     allImagesPathList = getAllImages(basePath=args.inputImagesPath)
     json_lists = []
@@ -118,9 +152,20 @@ def create_from_images():
                 url, dataset_label=args.dataset_label)
         elif args.dataTypeFlag == 'cls':
             # 需要修改cls部分
+            img_name = imagePath.split('/')[-1]
+            if not args.label_is_None:
+                if args.label_from_imgname:
+                    cls = get_label_from_imgname(img_name)
+                else:
+                    cls = get_label_from_labelfile(img_name)
+                    print "暂不支持"
+                    exit()
+            else:
+                cls = None
+        if request_label(cls): # 判定是否是需要的类别
             json_list = make_labelX_json_cls(
-                url, cls=None, dataset_label=args.dataset_label)
-        json_lists.append(json_list)
+                url, cls, dataset_label=args.dataset_label)
+            json_lists.append(json_list)
     # 生成labelX jsonlist文件
     output = args.output if args.output else os.path.join(
         args.inputImagesPath, 'labels.json')
@@ -132,8 +177,6 @@ def create_from_jsons():
     input_jsons = load_json(args.inputJsonList)
     json_lists = []
 
-    # cifar10 class name
-    # ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     for input_json in input_jsons:
         url = input_json['url']
         # url添加前缀
@@ -153,7 +196,7 @@ def create_from_jsons():
                 url, cls=cls, dataset_label=args.dataset_label)
         json_lists.append(json_list)
     # 生成labelX jsonlist文件
-    output = args.output if args.output else "{}_labelX.json".format(
+    output = args.output if args.output else "{}_new.json".format(
         os.path.splitext(args.inputJsonList)[0])
     write_to_json(json_lists, output)
     
@@ -163,7 +206,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="生成图片分类和检测的jsonlist")
     parser.add_argument('--actionFlag', required=True,
                         type=int, choices=[1, 2])
-    parser.add_argument('--dataTypeFlag', default=0, type=str, choices=['cls', 'det'], 
+    parser.add_argument('--dataTypeFlag', default='cls', type=str, choices=['cls', 'det'], 
                         required=True, help="data type")
     parser.add_argument('--inputImagesPath', dest='inputImagesPath', type=str)
     parser.add_argument('--inputJsonList', type=str, help='input jsonlist file path')
@@ -178,6 +221,13 @@ def parse_args():
     parser.add_argument(
         '--label_is_None', help='optional 设置后所有的图片类别为空（用于labelx发包）', 
         default=False, type=bool, choices=[True, False])
+    parser.add_argument(
+        '--label_from_imgname', help='optional 设置后从图片名获取label信息',
+        default=False, type=bool, choices=[True, False])
+    parser.add_argument('--labels', type=str,
+                        help='类别信息，包含类别名以及对应的index 的labels.lst文件')
+    parser.add_argument('--index_list', type=str,
+                        help='图片的index list，包含图片名以及对应的类别index')
     
     return parser.parse_args()
 

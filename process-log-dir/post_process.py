@@ -10,9 +10,10 @@ import argparse
 from collections import Counter
 
 '''
-将多线程多进程推理的1000份结果整合在一起，输出各个类别的统计信息
+将多线程多进程推理的1000份结果整合在一起，同时输出各个类别的统计信息
     
         --root  数据根目录 [required]
+        --datatype 数据类型  cls 分类  det 检测 
         --output   输出的json list，set result/<root name>_thres.json by default [optional]
         --num  分割任务的数量，1000 by default [required][default=1000]
         --gpuNumber  推理是gpu的数量， 4 by default [required][default=4]
@@ -34,6 +35,28 @@ def make_labelX_json_cls(url=None, cls=None, dataset_label='terror'):
     '''
     label_json = {"data": [{"class": cls}], "version": "1",
                   "type": "classification", "name": dataset_label}
+    ava_json = {"url": url, "ops": "download()", "type": "image",
+                "label": [label_json]}
+    return ava_json
+
+
+def make_labelX_json_det(url=None, data=[], dataset_label='detect'):
+    '''
+    url, type, <source_url>, <ops>, 
+    label:
+        [{
+        "data": [{
+            "ground_truth": true, 
+            "class": "fire", 
+            "bbox": [[638, 267], [821, 267], [821, 474], [638, 474]
+            ]}, 
+        "version": "1", 
+        "type": "detection", 
+        "name": "detect"
+        }]
+    '''
+    label_json = {"data": data, "version": "1",
+                  "type": "detection", "name": dataset_label}
     ava_json = {"url": url, "ops": "download()", "type": "image",
                 "label": [label_json]}
     return ava_json
@@ -118,6 +141,8 @@ def labels_cls_analyse(json_lists):
 def parse_args():
     parser = argparse.ArgumentParser(description="将多线程多进程推理的1000份结果整合在一起")
     parser.add_argument('--root', required=True,type=str)
+    parser.add_argument('--dataTypeFlag', default=0, type=str, choices=['cls', 'det'],
+                        required=True, help="data type")
     parser.add_argument('--output', type=str, help = 'set result/<root name>_thres.json by default')
     parser.add_argument('--num', type=int, default=1000)
     parser.add_argument('--gpuNumber', type=int, default=4)
