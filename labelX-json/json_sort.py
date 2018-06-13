@@ -108,8 +108,6 @@ def main():
     output_json = args.output if args.output \
         else "{}_sort.json".format(os.path.splitext(args.input)[0])
     json_lists = load_json(input_json)
-    print len(json_lists)
-    print json_lists[0]
     if args.dataTypeFlag == 'cls':
         label_lists = labels_cls_analyse(json_lists)
         sort_label_lists = [label_list for keys in label_lists.keys()
