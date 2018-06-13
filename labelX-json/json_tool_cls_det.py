@@ -249,12 +249,3 @@ if __name__ == '__main__':
     print 'End ...'
 
 
-"""
-# cifar10 test label
-python json_tool_cls_det.py \
---actionFlag  2 \
---dataTypeFlag cls \
---inputJsonList /Users/zhuriheng/resources/json-list/cifar10/cifar10_test_with_labels.json \
---prefix  http://p3nocaipw.bkt.clouddn.com/test/ \
---dataset_label general
-"""

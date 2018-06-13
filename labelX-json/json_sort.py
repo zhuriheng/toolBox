@@ -43,9 +43,9 @@ def write_to_file(json_lists, output):
 def parse_args():
     parser = argparse.ArgumentParser(
         description='将jsonlist根据label信息排序，统计jsonlist的类别（分类）信息')
+    parser.add_argument('input', help='input json file', type=str)
     parser.add_argument('--dataTypeFlag', default='cls', type=str, choices=['cls', 'det'],
                         help="data type")
-    parser.add_argument('--input', help='input json file', type=str)
     parser.add_argument(
         '--output', help='output json file, <infile>_sort.json by default', type=str)
     return parser.parse_args()
