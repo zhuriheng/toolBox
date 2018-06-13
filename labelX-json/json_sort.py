@@ -80,7 +80,8 @@ def labels_cls_analyse(json_lists):
     '''
     labels = [json_list['label'][0]['data'][0]['class']
               for json_list in json_lists
-              if json_list['label']]
+              if json_list['label']
+              if json_list['label'][0]['data']]
     # 统计labels的类别信息
     print Counter(labels).most_common()
 
@@ -89,9 +90,10 @@ def labels_cls_analyse(json_lists):
     for json_list in json_lists:
         if json_list['label']:
             # get label information
-            label = str(json_list['label'][0]['data'][0]['class'])
-            url = json_list['url']
-            label_lists[label].append(json_list)
+            if json_list['label'][0]['data']:
+                label = str(json_list['label'][0]['data'][0]['class'])
+                url = json_list['url']
+                label_lists[label].append(json_list)
         else:
             label = 'null'
             label_lists[label].append(json_list)
@@ -106,7 +108,8 @@ def main():
     output_json = args.output if args.output \
         else "{}_sort.json".format(os.path.splitext(args.input)[0])
     json_lists = load_json(input_json)
-
+    print len(json_lists)
+    print json_lists[0]
     if args.dataTypeFlag == 'cls':
         label_lists = labels_cls_analyse(json_lists)
         sort_label_lists = [label_list for keys in label_lists.keys()
