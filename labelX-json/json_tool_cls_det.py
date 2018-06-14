@@ -162,10 +162,10 @@ def create_from_images():
                     exit()
             else:
                 cls = None
-        if request_label(cls): # 判定是否是需要的类别
-            json_list = make_labelX_json_cls(
-                url, cls, dataset_label=args.dataset_label)
-            json_lists.append(json_list)
+            if request_label(cls): # 判定是否是需要的类别
+                json_list = make_labelX_json_cls(
+                    url, cls, dataset_label=args.dataset_label)
+                json_lists.append(json_list)
     # 生成labelX jsonlist文件
     output = args.output if args.output else os.path.join(
         args.inputImagesPath, 'labels.json')
