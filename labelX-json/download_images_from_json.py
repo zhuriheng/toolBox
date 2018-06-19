@@ -120,16 +120,24 @@ def main():
                     not_valid_img_urls.append(url)
             else:
                 download_err_urls.append(url)
-    
 
     output_name_map = os.path.join(
         args.download_path, 'name_map_{}.json'.format(time))
     write_to_json(name_map_list, output_name_map)
-    print 'Total error number: ' + str(len(download_err_urls))
+
+    #************ print information *******************
+    err_ulrs = len(download_err_urls)
+    print 'Total error number: ' + str(err_ulrs)
     print download_err_urls
     print '*' * 60
-    print 'Total unvalid images number: ' + str(len(not_valid_img_urls))
+    not_vaild = len(not_valid_img_urls)
+    print 'Total unvalid images number: ' + str(not_vaild)
     print not_valid_img_urls
+    print '*' * 60
+    total = len(json_lists)
+    success = total - err_ulrs - not_vaild
+    print 'Successful images number: ' + str(success)
+    #*******************************************
 
 if __name__ == '__main__':
     print 'Start process'
