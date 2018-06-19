@@ -112,6 +112,7 @@ def main():
         label_lists = labels_cls_analyse(json_lists)
         sort_label_lists = [label_list for keys in label_lists.keys()
                             for label_list in label_lists[keys]]
+        if label_lists.keys()[0].split('_')[0] 
         write_to_json(sort_label_lists, output_json)
     elif args.dataTypeFlag == 'det':
         print "暂未支持检测的json排序"
