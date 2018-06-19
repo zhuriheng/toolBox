@@ -89,6 +89,7 @@ def main():
     # 获取当日日期
     now = datetime.datetime.now()
     day = now.strftime("%m%d")
+    time = now.strftime("%m%d%H%M")
 
     create_folder_tree(args.download_path, CATEGORYS, 'train')
 
@@ -104,7 +105,7 @@ def main():
             name_map = {}
             ori_filename = url.split('/')[-1]
             new_filename = '{}_{}_{}.jpg'.format(label, day, num)
-            name_map['ori_image_name'] = ori_filename
+            name_map['ori_image_name'] = url
             name_map['new_image_name'] = new_filename
             output_path = os.path.join(
                 args.download_path, 'train', label, new_filename)
@@ -120,7 +121,9 @@ def main():
             else:
                 download_err_urls.append(url)
     
-    output_name_map = os.path.join(args.download_path, 'name_map.json')
+
+    output_name_map = os.path.join(
+        args.download_path, 'name_map_{}.json'.format(time))
     write_to_json(name_map_list, output_name_map)
     print 'Total error number: ' + str(len(download_err_urls))
     print download_err_urls
