@@ -26,11 +26,12 @@ actionFlag : 功能flag
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Traverse the folder and generate the index')
-    parser.add_argument('--actionFlag', required=True,
-                        help = '1: create image list with label index; 2: without label index', 
-                        type=int, choices=[1, 2])
+    #parser.add_argument('--actionFlag', required=True,
+    #                    help = '1: create image list with label index; 2: without label index', 
+    #                    type=int, choices=[1, 2])
     parser.add_argument('--root', 
                         help='root path', default=None, type=str)
+    parser.add_argument('--with_label_idx', help='add label index', action='store_true')
     parser.add_argument('--output',
                         help='output file name', type=str)
     parser.add_argument(
@@ -160,7 +161,7 @@ def generate_readme(categorys, fname):
 
 args = parse_args()
 def main():
-    actionFlag = args.actionFlag
+    # actionFlag = args.actionFlag
     print '--------' * 8
 
     allImageList = tarverse(args.root) 
