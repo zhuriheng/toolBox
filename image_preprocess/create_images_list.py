@@ -150,7 +150,7 @@ def generate_readme(categorys, fname):
     time = now.strftime("%D")
 
     with open(fname, 'w') as f:
-        f.write = "Label information:\n\n"
+        f.write("Label information:\n\n")
         for label in keys_sort:
             count = len(categorys[label])
             info = "%s \t count: %d" % (label,count)
