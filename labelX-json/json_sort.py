@@ -100,9 +100,15 @@ def labels_cls_analyse(json_lists):
     return label_lists
 
 
+def RepresentsInt(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
 args = parse_args()
-
-
 def main():
     input_json = args.input
     output_json = args.output if args.output \
@@ -110,8 +116,12 @@ def main():
     json_lists = load_json(input_json)
     if args.dataTypeFlag == 'cls':
         label_lists = labels_cls_analyse(json_lists)
-        sort_label_lists = [label_list for keys in label_lists.keys()
-                            for label_list in label_lists[keys]]
+        keys = label_lists.keys()
+        # 假如label的形式是 “index_labelname”(0_bk_bloodiness_human),则对index排序
+        if RepresentsInt(keys[0].split('_')[0]):
+            keys = sorted(keys, key=lambda k: int(k.split('_')[0]))
+        sort_label_lists = [label_list for key in keys
+                            for label_list in label_lists[key]]
         write_to_json(sort_label_lists, output_json)
     elif args.dataTypeFlag == 'det':
         print "暂未支持检测的json排序"

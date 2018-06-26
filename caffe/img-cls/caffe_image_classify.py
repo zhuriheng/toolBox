@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import time
-import datatime
+import datetime
 from collections import OrderedDict
 
 import cv2
@@ -150,7 +150,7 @@ def main():
     for i in range(len(img_list)):
         start_time = time.time()
         dict_result = single_img_process(
-            net_cls, args.root, img_list[i], label_list)
+            net_cls, args.root, img_list[i].split(' ')[0], label_list)
         end_time = time.time()
         print('Inference speed: {:.3f}s / iter'.format(end_time - start_time))
         for item in dict_result:
@@ -160,7 +160,7 @@ def main():
         label_corres_list = np.loadtxt(args.labels_corres, str, delimiter='\n')
         dict_results = label_correspond(label_corres_list, dict_results)
 
-    now = datatime.datatime.now()
+    now = datetime.datetime.now()
     output = os.path.join(args.root, 'results_%s.json' % (now.strftime("%m%d%H%M")))
     
     with open(output, 'w') as f:

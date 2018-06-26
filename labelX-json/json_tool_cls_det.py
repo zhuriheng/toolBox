@@ -16,9 +16,9 @@ actionFlag : 功能flag
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
         --prefix  jsonlist中图片url的前缀 [optional]
         --output  optional 输出文件, <infile>_labelX.json [optional][default=labels.json]
-        --label_is_None  optional [default=False]
-            a. 设置后图片类别为空（用于labelx发包）
-            b. 若不设置，需要提供图片的类别信息，图片名/类别名，图片list
+        --with_label  optional 
+            a. 设置后，需要提供图片的类别信息，图片名/类别名或者包含图片类别信息的list
+            b. 若不设置，图片类别为空（用于labelx发包）
         --label_from_imgname optional [default=False]
             a. 设置后从图片名获取label信息，根据实际情况修改get_label_from_imgname(imgname)函数
             b. 若不设置，需提供labels.csv 以及images.lst文件
@@ -28,10 +28,13 @@ actionFlag : 功能flag
     2  : 将其他的json格式修改为labelX标准的json格式
         根据个性化要求完成create_from_jsons()函数
         --inputJsonList  输入的jsonlist文件 [required]
+        --with_label  optional 
+            a. 设置后增加图片原有的类别信息
+            b. 不设置类别信息为空（用于labelX发包）
         --dataset_label   分类：'terror'/'pulp'/'general' 检测：'detect' [required]
         --prefix  jsonlist中图片url的前缀 [optional]
         --output  optional 输出文件, <infile>_new.json [optional][default=labels.json]
-        --label_is_None  optional 设置后所有的图片类别为空（用于labelx发包）[optional][default=False]
+        
 '''
 
 
@@ -153,7 +156,7 @@ def create_from_images():
         elif args.dataTypeFlag == 'cls':
             # 需要修改cls部分
             img_name = imagePath.split('/')[-1]
-            if not args.label_is_None:
+            if args.with_label:
                 if args.label_from_imgname:
                     cls = get_label_from_imgname(img_name)
                 else:
@@ -188,7 +191,7 @@ def create_from_jsons():
                 url, dataset_label=args.dataset_label)
         elif args.dataTypeFlag == 'cls':
             # 需要修改cls部分
-            if not args.label_is_None:
+            if args.with_label:
                 cls = input_json['class']
             else:
                 cls = None
@@ -219,8 +222,8 @@ def parse_args():
     parser.add_argument(
         '-np', '--nb_prefix', help='number of prefix, default = 1', default=1, type=int)
     parser.add_argument(
-        '--label_is_None', help='optional 设置后所有的图片类别为空（用于labelx发包）', 
-        default=False, type=bool, choices=[True, False])
+        '--with_label', help='optional 设置后所有的图片类别为空（用于labelx发包）', 
+        action='store_true')
     parser.add_argument(
         '--label_from_imgname', help='optional 设置后从图片名获取label信息',
         default=False, type=bool, choices=[True, False])
