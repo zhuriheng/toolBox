@@ -91,10 +91,9 @@ def convert_ground_truth(gt_file, map):
 
 def parse_arg():
     parser = argparse.ArgumentParser(description='convert cls48 to cls13')
-    parser.add_argument('--infer', help='inference result json file under cls48', type=str, required=False)
-    parser.add_argument('--gt', help='ground truth under cls48', type=str, required=False)
-    parser.add_argument('--weight', help='caffemodel', type=str, required=True)
-    parser.add_argument('--labels_corres', help='labels correspond list', type=str, required=False)
+    parser.add_argument('--infer', help='inference result json file under cls48', type=str)
+    parser.add_argument('--gt', help='ground truth under cls48', type=str)
+    parser.add_argument('--labels_corres', help='labels correspond list', type=str)
     return parser.parse_args()
 
 
