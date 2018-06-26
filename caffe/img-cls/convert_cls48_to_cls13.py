@@ -107,7 +107,7 @@ def main():
         map = {'0': [0], '1': [1, 2, 3, 4], '2': [
             5, 6], '3': [7, 8], '4': [9, 10]}  # 暴恐5类
         for idx in range(11, 18):
-            map[str(idx)] = idx-6  # 敏感类别7类
+            map[str(idx)] = [idx-6]  # 敏感类别7类
         map['12'] = list(range(18, 48))  # 正常18到47类
         print map
         convert_ground_truth(args.gt, map)
