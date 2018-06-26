@@ -97,8 +97,8 @@ def parse_arg():
     return parser.parse_args()
 
 
+args = parse_arg()
 def main():
-    args = parse_arg()
     if args.infer:
         label_corres_list = np.loadtxt(args.labels_corres, str, delimiter='\n')
         convert_infer_result(args.infer, label_corres_list)
