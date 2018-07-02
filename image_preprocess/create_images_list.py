@@ -121,6 +121,7 @@ def write_each_category(categorys, portion=1.0):
                 label_index = label.split('_')[0]
                 f.write(tmp + ' ' + label_index)
                 f.write('\n')
+        print "Generate %s with success" % (filename)
 
 def write_total_category(categorys, output, portion=1.0, with_label=True):
     '''
@@ -139,6 +140,7 @@ def write_total_category(categorys, output, portion=1.0, with_label=True):
                     f.write(tmp + ' ' + label_index + '\n')
                 else:
                     f.write(tmp + '\n')
+    print "Generate %s with success" % (output) 
 
 
 def generate_readme(categorys, fname):
@@ -158,6 +160,7 @@ def generate_readme(categorys, fname):
         f.write('\n')
         f.write("Author: %s\n" % ('zhuriheng'))
         f.write("Time: %s\n" % (time))
+    print "Generate %s with success" % (fname)
 
 args = parse_args()
 def main():

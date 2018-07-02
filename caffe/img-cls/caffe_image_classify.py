@@ -121,6 +121,46 @@ def single_img_process(net_cls, img_path, ori_img, label_list):
 
     return list_result
 
+def generate_rg_results(dict_results, output):
+    """
+    docstring here
+        :param dict_results: 
+        :param output: 
+    """
+    # 回归测试48类到6类的类别映射表
+    labels = ['bloodiness', 'bomb', 'beheaded', 'march', 'fight', 'normal']
+    map = {'0': [0],
+           '1': [1, 2, 3, 4],
+           '2': [5, 6],
+           '3': [7, 8],
+           '4': [9, 10]}  # 暴恐5类
+    map['5'] = list(range(11, 48))  # 正常18到47类
+
+    with open(output, 'w') as fo:
+        for (img_name, results) in dict_results.iteritems():
+            label = OrderedDict()
+            img_name = os.path.split(img_name)[-1]
+            index = int(results['Top-1 Index'])
+            prob = float(results['Confidence'][index])
+            # 获取label信息
+            for key in map.keys():
+                if index in map[key]:
+                    cls_name = labels[key]
+                    break
+            # 暴恐分类目前线上的逻辑
+            if prob < 0.9 and cls_name != 'normal':
+                cls_name = 'normal'
+                index = -1
+
+            label["class"] = cls_name
+            label["index"] = index
+            label["score"] = prob
+
+            fo.write(img_name + '\t')
+            json.dump(label, fo)
+            fo.write('\n')
+            
+    print "Generate %s with success" % (output)
 
 
 def parse_arg():
@@ -130,6 +170,7 @@ def parse_arg():
     parser.add_argument('--gpu', help='gpu id', type=int, required=True)
     parser.add_argument('--labels', help='labels list',type=str, required=True)
     parser.add_argument('--labels_corres', help='labels correspond list', type=str, required=False)
+    parser.add_argument('--rg', help='add "--rg" to generate regression result',action='store_true')
     parser.add_argument('--img_list', help='input image list',type=str, required=False)
     parser.add_argument('--root', help='data root for image',type=str, required=False)
     parser.add_argument('--url_list', help='input image url list', type=str, required=False)
@@ -139,6 +180,7 @@ def parse_arg():
 
 def main():
     args = parse_arg()
+    now = datetime.datetime.now()
     
     net_cls = init_models(args.weight, args.deploy, args.gpu)
 
@@ -156,15 +198,20 @@ def main():
         for item in dict_result:
             dict_results[os.path.basename(item['File Name'])] = item
     
+    if args.rg:
+        rg_output = os.path.join(args.root, 'regression_%s.tsv' % (now.strftime("%m%d%H%M")))
+        generate_rg_results(dict_results, rg_output)
+            
+
     if args.labels_corres:
         label_corres_list = np.loadtxt(args.labels_corres, str, delimiter='\n')
         dict_results = label_correspond(label_corres_list, dict_results)
 
-    now = datetime.datetime.now()
     output = os.path.join(args.root, 'results_%s.json' % (now.strftime("%m%d%H%M")))
     
     with open(output, 'w') as f:
         json.dump(dict_results, f, indent=4)
+    print "Generate %s with success" % (output)
 
 if __name__ == '__main__':
     print('Start caffe image classify:')
