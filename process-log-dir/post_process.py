@@ -118,7 +118,7 @@ def filter(results, threshold):
 def get_file_list(path, num, gpuNumber):
     filenames = []
     for i in range(num):
-        folder = os.path.join(path,'job-0' + str(i))
+        folder = os.path.join(path,'job-0' + str(i).zfill(3))
         for j in range(gpuNumber):
             filename = os.path.join(folder, 'split_file-0'+str(j)+'_0-result.json')
             if os.path.isfile(filename):
