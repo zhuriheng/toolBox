@@ -84,7 +84,7 @@ def main():
         if md5_key in md5_imagaPath_dict:
             print("%s --- %s same md5_key" %
                   (imagePath, md5_imagaPath_dict.get(md5_key)))
-            if args.mv:
+            if args.move:
                 mv_same_md5_file(one=md5_imagaPath_dict.get(
                     md5_key), two=imagePath, duplicationDir=args.duplicationDir)
         else:
