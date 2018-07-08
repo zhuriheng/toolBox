@@ -117,7 +117,7 @@ def getAllImages(basePath=None):
 
 def get_label_from_labelfile(imgname):
     '''
-    获得图片的label信息
+    通过label列表获得图片的label信息
     '''
     label = None
     return label
@@ -125,10 +125,19 @@ def get_label_from_labelfile(imgname):
 
 def get_label_from_imgname(imgname):
     '''
-    获得图片的label信息
+    通过文件名获得图片的label信息
     '''
     label = imgname.split('_0227_')[0]
     return label
+
+
+def get_label_from_directory(imagePath):
+    '''
+    通过文件路径获得图片的label信息
+    '''
+    label = None
+    return label
+
 
 def request_label(cls=None, index=None):
     if not cls:  # cls为空，没有类别信息，返回True
@@ -140,40 +149,68 @@ def request_label(cls=None, index=None):
         else:
             return False
 
+
+def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_from_imgname, label_from_directory, dataset_label):
+    json_lists = []
+    for imagePath in imagesPathList:
+        url = imagePath.split('/')[-nb_prefix:]
+        url = '/'.join(url)
+        url = url if not prefix else os.path.join(prefix, url)
+        img_name = imagePath.split('/')[-1]
+
+        cls = None
+        if with_label:
+            if label_from_imgname:
+                cls = get_label_from_imgname(img_name)
+            elif label_from_directory:
+                cls = get_label_from_directory(imagePath)
+                print("暂不支持")
+                exit()
+            else:
+                cls = get_label_from_labelfile(img_name)
+                print("暂不支持")
+                exit()
+        if request_label(cls):  # 判定是否是需要的类别
+            json_list = make_labelX_json_cls(
+                url, cls, dataset_label=dataset_label)
+        json_lists.append(json_list)
+    return json_lists
+
+
+def process_detection(imagesPathList, nb_prefix, prefix, with_label, dataset_label):
+    json_lists = []
+    for imagePath in imagesPathList:
+        url = imagePath.split('/')[-nb_prefix:]
+        url = '/'.join(url)
+        url = url if not prefix else os.path.join(prefix, url)
+        img_name = imagePath.split('/')[-1]
+
+        if with_label:
+            print("暂不支持")
+            exit()
+        else:
+            json_list = make_labelX_json_det(
+                url, dataset_label=dataset_label)
+        json_lists.append(json_list)
+    return json_lists
+
+
 def create_from_images():
     allImagesPathList = getAllImages(basePath=args.inputImagesPath)
-    json_lists = []
-    for imagePath in allImagesPathList:
-        url = imagePath.split('/')[-args.nb_prefix:]
-        url = '/'.join(url)
-        # url添加前缀
-        if args.prefix:
-            url = os.path.join(args.prefix, url)
-        # 判定数据类型
-        if args.dataTypeFlag == 'det':
-            json_list = make_labelX_json_det(
-                url, dataset_label=args.dataset_label)
-        elif args.dataTypeFlag == 'cls':
-            # 需要修改cls部分
-            img_name = imagePath.split('/')[-1]
-            if args.with_label:
-                if args.label_from_imgname:
-                    cls = get_label_from_imgname(img_name)
-                else:
-                    cls = get_label_from_labelfile(img_name)
-                    print "暂不支持"
-                    exit()
-            else:
-                cls = None
-            if request_label(cls): # 判定是否是需要的类别
-                json_list = make_labelX_json_cls(
-                    url, cls, dataset_label=args.dataset_label)
-                json_lists.append(json_list)
+    
+    if args.dataTypeFlag == 'det':
+        json_lists = process_classification(
+            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.label_from_imgname, args.label_from_directory, args.dataset_label)
+    elif args.dataTypeFlag == 'cls':
+        json_lists = process_detection(
+            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.dataset_label)
+    
     # 生成labelX jsonlist文件
     output = args.output if args.output else os.path.join(
         args.inputImagesPath, 'labels.json')
     write_to_json(json_lists, output)
-    pass
+    print("generate file: %s" % (output))
+
 
 def create_from_jsons():
     # 读取输入的jsonlist文件
@@ -202,6 +239,7 @@ def create_from_jsons():
     output = args.output if args.output else "{}_new.json".format(
         os.path.splitext(args.inputJsonList)[0])
     write_to_json(json_lists, output)
+    print("generate file: %s" % (output))
     
 
 # 使用argparse
@@ -220,7 +258,7 @@ def parse_args():
     parser.add_argument('--prefix', dest='prefix',
                         help='prefix of url', default=None, type=str)
     parser.add_argument(
-        '-np', '--nb_prefix', help='number of prefix, default = 1', default=1, type=int)
+        '-np', '--nb_prefix', help='number of prefix, default = 1, eg. if np=3, ouput: train/0_cat/cat1.jpg', default=1, type=int)
     parser.add_argument(
         '--with_label', help='optional 设置后所有的图片类别为空（用于labelx发包）', 
         action='store_true')
