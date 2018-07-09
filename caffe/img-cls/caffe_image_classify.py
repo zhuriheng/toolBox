@@ -145,7 +145,7 @@ def generate_rg_results(dict_results, threshold, output):
             prob = float(results['Confidence'][index])
             # 获取对应的label
             [cls_name] = [labels[int(key)] for key in map.keys() if index in map[key]]
-            # 暴恐分类目前的线上逻辑: 只有类别是非normal，并且score小于0.9的才被标为reviewer
+            # 暴恐分类目前的线上逻辑: 只有类别是非normal，并且score小于0.9的才被标为review
             if prob < threshold and cls_name != 'normal':
                 cls_name = 'normal'
                 index = -1
@@ -158,7 +158,7 @@ def generate_rg_results(dict_results, threshold, output):
             json.dump(label, fo)
             fo.write('\n')
             
-    print "Generate %s with success" % (output)
+    print("Generate %s with success" % (output))
 
 
 def process_single_img(img_path, net_cls, label_list):
@@ -212,7 +212,7 @@ def parse_arg():
     parser.add_argument('--labels', help='labels list',type=str, required=True)
     parser.add_argument('-thrs','--threshold', help='threshold for inference result',type=float, default=0.9)
     parser.add_argument('--labels_corres', help='labels correspond list', type=str, required=False)
-    parser.add_argument('-rg','--regression_result', help='add "--rg" to generate regression result',action='store_true')
+    parser.add_argument('-rg','--regression_result', help='add "-rg" to generate regression result',action='store_true')
     parser.add_argument('--img', help='input image, inference for single local image', type=str, required=False)
     parser.add_argument('--img_list', help='input image list', default=None, type=str, required=False)
     parser.add_argument('--root', help='data root for image', default=None, type=str, required=False)
@@ -253,7 +253,7 @@ def main():
     
     with open(output, 'w') as f:
         json.dump(dict_results, f, indent=4)
-    print "Generate %s with success" % (output)
+    print("Generate %s with success" % (output))
 
 if __name__ == '__main__':
     print('Start caffe image classify:')
