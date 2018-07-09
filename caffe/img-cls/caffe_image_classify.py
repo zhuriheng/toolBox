@@ -146,7 +146,7 @@ def multiple_batch_process(net_cls, img_list, label_list):
         # current batch can not satisfit batch-size argument
         if index > (len(img_list) - 1):
             continue
-        output_prob = output['prob'][index]
+        output_prob = np.squeeze(output['prob'][index])
         # print output
         # print output_prob
 
@@ -224,7 +224,7 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
     for i in range(len(batches)):
         batch = batches[i]
         img_list = []
-        for  i in range(batch):
+        for  i in range(len(batch)):
             img_path = os.path.join(root, batch[i].split(' ')[0])
             img = cv2.imread(img_path)
             img_list.append(img)
