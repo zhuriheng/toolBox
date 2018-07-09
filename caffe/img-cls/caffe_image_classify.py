@@ -15,7 +15,8 @@ import urllib
 sys.path.insert(0, 'caffe/python')
 import caffe
 
-def init_models(weight, deploy, gpu=0):
+
+def init_models(weight, deploy, batch_size, gpu=0, image_width=225):
     """
     initialization caffe model 
         :param gpu: gpu id, 0 by default
@@ -26,7 +27,8 @@ def init_models(weight, deploy, gpu=0):
     caffe.set_device(gpu)
 
     net_cls = caffe.Net(deploy, weight, caffe.TEST)
-
+    net_cls.blobs['data'].reshape(
+        batch_size, 3, image_width, image_width)   # 3-channel (BGR) images
     return net_cls
 
 # center_crop的具体效果
@@ -121,6 +123,46 @@ def single_img_process(net_cls, img, label_list):
     return None
 
 
+def multiple_batch_process(net_cls, img_list, label_list):
+    global ERROR_IMG
+    for index, img in enumerate(img_list):
+        try:
+            img = cv2.resize(img, (256, 256))
+            img = img.astype(np.float32, copy=True)
+            img -= np.array([[[103.94, 116.78, 123.68]]])
+            img = img * 0.017
+
+            img = center_crop(img, 225)
+            img = img.transpose((2, 0, 1))
+        except Exception, e:
+            print(Exception, ":", e)
+            continue
+        net_cls.blobs['data'].data[index] = img
+
+    output = net_cls.forward()
+
+    lst_result = list()
+    for index, output_prob in enumerate(output['prob']):
+        # current batch can not satisfit batch-size argument
+        if index > (len(img_list) - 1):
+            continue
+        output_prob = output['prob'][index]
+        # print output
+        # print output_prob
+
+        # sort index list & create sorted rate list
+        index_list = output_prob.argsort()
+        rate_list = output_prob[index_list]
+
+        result_dict = OrderedDict()
+        result_dict['Top-1 Index'] = index_list[-1]
+        result_dict['Top-1 Class'] = label_list[index_list[-1]]
+        # avoid JSON serializable error
+        result_dict['Confidence'] = [str(i) for i in list(output_prob)]
+        lst_result.append(result_dict)
+    return lst_result
+    
+
 def generate_rg_results(dict_results, threshold, output):
     """
     docstring here
@@ -161,7 +203,7 @@ def generate_rg_results(dict_results, threshold, output):
     print("Generate %s with success" % (output))
 
 
-def process_single_img(img_path, net_cls, label_list):
+def process_single_img(img_path, net_cls, label_list, batch_size):
     dict_results = OrderedDict()
     start_time = time.time()
     img = cv2.imread(img_path)
@@ -173,10 +215,29 @@ def process_single_img(img_path, net_cls, label_list):
     return dict_results
 
 
-def process_img_list(root, img_list_path, net_cls, label_list):
+def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
     img_list = np.loadtxt(img_list_path, str, delimiter='\n')
     dict_results = OrderedDict()
-    for i in range(len(img_list)):
+
+    batches = [img_list[i:i + batch_size]
+                for i in xrange(0, len(img_list), batch_size)]  # for py3: range()
+    for i in range(len(batches)):
+        batch = batches[i]
+        img_list = []
+        for  i in range(batch):
+            img_path = os.path.join(root, batch[i].split(' ')[0])
+            img = cv2.imread(img_path)
+            img_list.append(img)
+        lst_result = multiple_batch_process(net_cls, img_list, label_list)
+        for i in range(len(lst_result)):
+            dict_result = lst_result[i]
+            img_path = os.path.join(root, batch[i].split(' ')[0])
+            dict_result.update({'File Name': img_path})
+            dict_results[os.path.basename(img_path)] = dict_result
+    return dict_results
+
+    
+'''     for i in range(len(img_list)):
         start_time = time.time()
         img_path = os.path.join(root, img_list[i].split(' ')[0])
         img = cv2.imread(img_path)
@@ -185,10 +246,10 @@ def process_img_list(root, img_list_path, net_cls, label_list):
         print('Inference speed: {:.3f}s / iter'.format(end_time - start_time))
         dict_result.update({'File Name': img_path})
         dict_results[os.path.basename(img_path)] = dict_result
-    return dict_results
+    return dict_results '''
 
 
-def process_img_urllist(url_list_path, prefix, net_cls, label_list):
+def process_img_urllist(url_list_path, prefix, net_cls, label_list, batch_size):
     url_list = np.loadtxt(url_list_path, str, delimiter='\n')
     dict_results = OrderedDict()
     for i in range(len(url_list)):
@@ -210,6 +271,7 @@ def parse_arg():
     parser.add_argument('--deploy', help='deploy.prototxt',type=str, required=True)
     parser.add_argument('--gpu', help='gpu id', type=int, required=True)
     parser.add_argument('--labels', help='labels list',type=str, required=True)
+    parser.add_argument('--batch_size', help='batch size',type=int, default=1)
     parser.add_argument('-thrs','--threshold', help='threshold for inference result',type=float, default=0.9)
     parser.add_argument('--labels_corres', help='labels correspond list', type=str, required=False)
     parser.add_argument('-rg','--regression_result', help='add "-rg" to generate regression result',action='store_true')
@@ -225,26 +287,30 @@ def main():
     args = parse_arg()
     now = datetime.datetime.now()
     
-    net_cls = init_models(args.weight, args.deploy, args.gpu)
+    net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
     label_list = np.loadtxt(args.labels, str, delimiter='\n')
 
     dict_results = OrderedDict()
     if args.img:
         # 推理单张图片
-        dict_results = process_single_img(args.img, net_cls, label_list)
+        dict_results = process_single_img(args.img, net_cls, label_list, args.batch_size)
     elif args.img_list:
         # 推理存储在本地的图片
         dict_results = process_img_list(
-            args.root, args.img_list, net_cls, label_list)
+            args.root, args.img_list, net_cls, label_list, args.batch_size)
     elif args.url_list:
         # 推理url形式的图片
         dict_results = process_img_urllist(
-            args.url_list, args.prefix, net_cls, label_list)
-    
+            args.url_list, args.prefix, net_cls, label_list, args.batch_size)
+    # 回归测试格式的推理结果
     if args.regression_result:
-        rg_output = os.path.join(args.root, 'regression_%s.tsv' % (now.strftime("%m%d%H%M")))
-        generate_rg_results(dict_results, args.threshold, rg_output)
-            
+        if dict_results:
+            rg_output = os.path.join(args.root, 'regression_%s.tsv' % (now.strftime("%m%d%H%M")))
+            generate_rg_results(dict_results, args.threshold, rg_output)
+            print("Generate %s with success" % (rg_output))
+        else:
+            print("Result is None, generate %s unsuccessfully" % (rg_output))
+    # 48类映射为17类的推理结果
     if args.labels_corres:
         label_corres_list = np.loadtxt(args.labels_corres, str, delimiter='\n')
         dict_results = label_correspond(label_corres_list, dict_results)
