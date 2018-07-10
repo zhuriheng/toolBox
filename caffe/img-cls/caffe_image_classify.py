@@ -125,21 +125,27 @@ def single_img_process(net_cls, img, label_list):
 
 def multiple_batch_process(net_cls, img_list, label_list):
     global ERROR_IMG
+
+    _t1 = time.time()
     for index, img in enumerate(img_list):
         try:
             img = cv2.resize(img, (256, 256))
             img = img.astype(np.float32, copy=True)
             img -= np.array([[[103.94, 116.78, 123.68]]])
             img = img * 0.017
-
             img = center_crop(img, 225)
             img = img.transpose((2, 0, 1))
         except Exception, e:
             print(Exception, ":", e)
             continue
         net_cls.blobs['data'].data[index] = img
+    _t2 = time.time()
+    print("Preprocess and load image to net: %f\n", _t2 - _t1)
 
+    _t1 = time.time()
     output = net_cls.forward()
+    _t2 = time.time()
+    print("forward: %f\n", _t2 - _t1)
 
     lst_result = list()
     for index, output_prob in enumerate(output['prob']):
@@ -287,7 +293,7 @@ def main():
     now = datetime.datetime.now()
     day = now.strftime("%m%d")
     output_folder = "result/{}".format(day)
-    if os.path.exists(output_folder):
+    if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
     net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
@@ -311,7 +317,6 @@ def main():
             rg_output = os.path.join(
                 output_folder, 'regression_%s.tsv' % (now.strftime("%H%M%S")))
             generate_rg_results(dict_results, args.threshold, rg_output)
-            print("Generate %s with success" % (rg_output))
         else:
             print("Result is None, generate %s unsuccessfully" % (rg_output))
     # 48类映射为17类的推理结果
