@@ -221,8 +221,7 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
 
     batches = [img_list[i:i + batch_size]
                 for i in xrange(0, len(img_list), batch_size)]  # for py3: range()
-    for i in range(len(batches)):
-        batch = batches[i]
+    for batch in batches:
         img_list = []
         for  i in range(len(batch)):
             img_path = os.path.join(root, batch[i].split(' ')[0])
@@ -286,7 +285,11 @@ def parse_arg():
 def main():
     args = parse_arg()
     now = datetime.datetime.now()
-    
+    day = now.strftime("%m%d")
+    output_folder = "result/{}".format(day)
+    if os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
     net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
     label_list = np.loadtxt(args.labels, str, delimiter='\n')
 
@@ -305,7 +308,8 @@ def main():
     # 回归测试格式的推理结果
     if args.regression_result:
         if dict_results:
-            rg_output = os.path.join(args.root, 'regression_%s.tsv' % (now.strftime("%m%d%H%M")))
+            rg_output = os.path.join(
+                output_folder, 'regression_%s.tsv' % (now.strftime("%H%M%S")))
             generate_rg_results(dict_results, args.threshold, rg_output)
             print("Generate %s with success" % (rg_output))
         else:
@@ -315,7 +319,8 @@ def main():
         label_corres_list = np.loadtxt(args.labels_corres, str, delimiter='\n')
         dict_results = label_correspond(label_corres_list, dict_results)
 
-    output = os.path.join(args.root, 'results_%s.json' % (now.strftime("%m%d%H%M")))
+    output = os.path.join(output_folder, 'results_%s.json' %
+                          (now.strftime("%H%M%S")))
     
     with open(output, 'w') as f:
         json.dump(dict_results, f, indent=4)
