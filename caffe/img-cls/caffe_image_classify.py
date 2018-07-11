@@ -129,8 +129,9 @@ def multiple_batch_process(net_cls, img_list, label_list):
     _t1 = time.time()
     for index, img in enumerate(img_list):
         try:
-            img = cv2.resize(img, (256, 256))
             img = img.astype(np.float32, copy=True)
+            img = cv2.resize(img, (256, 256))
+            #img = img.astype(np.float32, copy=True)
             img -= np.array([[[103.94, 116.78, 123.68]]])
             img = img * 0.017
             img = center_crop(img, 225)
@@ -202,9 +203,7 @@ def generate_rg_results(dict_results, threshold, output):
             label["index"] = index
             label["score"] = prob
 
-            fo.write(img_name + '\t')
-            json.dump(label, fo)
-            fo.write('\n')
+            fo.write('%s%t%s\n' % (img_name, json.dumps([label])))
             
     print("Generate %s with success" % (output))
 
