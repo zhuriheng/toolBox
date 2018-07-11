@@ -95,7 +95,7 @@ def labels_cls_analyse(json_lists):
                 url = json_list['url']
                 label_lists[label].append(json_list)
         else:
-            label = 'null'
+            label = '0_null'
             label_lists[label].append(json_list)
     return label_lists
 
