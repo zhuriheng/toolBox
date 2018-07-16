@@ -27,7 +27,7 @@ def write_to_json(json_lists, output):
 
 def valid_image(img_path):
     image = cv2.imread(img_path)
-    if np.shape(image) != () :
+    if np.shape(image) != () and np.shape(image)[2] != 4:
         return True
     else:
         return False
