@@ -102,7 +102,8 @@ def main():
           (len(allImagesPathList) - len(md5_imagaPath_dict)))
     print("Images number after deduplication: %d " % (len(md5_imagaPath_dict)))
 
-
+ 
+ 
 if __name__ == '__main__':
     print 'Start processing'
     main()
