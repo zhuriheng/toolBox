@@ -93,7 +93,6 @@ def main():
     # 将md5值存储下来
     if args.md5_file:
         output = os.path.join(args.inputImagesPath, 'md5.json')
-        output = args.md5_file
         write_json(md5_imagaPath_dict, output)
         print("Generate %s with success" % (output))
 
@@ -103,7 +102,7 @@ def main():
     print("Images number after deduplication: %d " % (len(md5_imagaPath_dict)))
 
  
- 
+
 if __name__ == '__main__':
     print 'Start processing'
     main()
