@@ -7,7 +7,7 @@ import argparse
 import hashlib
 
 '''
-    从本地depot读取图片，计算图片的md5值,作为底库; 
+    从本地1读取图片，计算图片的md5值,作为底库; 
     从本地2读取图片，计算md5值，并与底库比对。将重复的图片从本地2中移除.
         -dep depot image root path [required]
         -targ target image root path [required]
@@ -69,14 +69,14 @@ def compare(depot_path, target_path, duplication_path):
     '''
     比较目标数据库中是否有图片与底库中的图片有相同的md5值
     '''
-    # 生成底库的md5字典
+    # 生成depot的md5字典
     print 'depot md5 process'
     depotImageList = getAllImageList(depot_path)
     md5_depot = dict()
     for imageList in depotImageList:
         md5_key = md5_process(imageList)
         md5_depot[md5_key] = imageList
-    # 生成目标地址的md5字典
+    # 生成target的md5字典
     print 'target md5 process'
     targetImageList = getAllImageList(target_path)
     nb_dup = 0
