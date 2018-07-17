@@ -86,7 +86,7 @@ def compare(depot_path, target_path, duplication_path):
             nb_dup += 1
             print '%s -- %s same md5 value' % (imageList,
                                                md5_depot.get(md5_key))
-            if args.mv:
+            if args.move:
                 move_same_md5_image(duplication_path, imageList)
         else:
             md5_depot[md5_key] = imageList
@@ -97,9 +97,9 @@ def compare(depot_path, target_path, duplication_path):
 
 args = parse_arg()
 def main():
-    depot_path = args.depot_path
-    target_path = args.target_path
-    duplication_path = args.duplication_path
+    depot_path = args.depot
+    target_path = args.target
+    duplication_path = args.duplication
     compare(depot_path, target_path, duplication_path)
 
 if __name__ == '__main__':
