@@ -153,10 +153,13 @@ def generate_readme(categorys, fname):
 
     with open(fname, 'w') as f:
         f.write("Label information:\n\n")
+        total = 0
         for label in keys_sort:
             count = len(categorys[label])
+            total += count
             info = "%s \t count: %d" % (label,count)
             f.write(info + '\n')
+        f.write("\nTotal \t count: %d" % (total) + '\n')
         f.write('\n')
         f.write("Author: %s\n" % ('zhuriheng'))
         f.write("Time: %s\n" % (time))
