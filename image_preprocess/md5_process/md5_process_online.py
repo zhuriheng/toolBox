@@ -107,6 +107,11 @@ class cons_worker(threading.Thread):
                         self.queue.put(file_tmp)
                         GLOBAL_LOCK.release()
                         break
+                    except requests.exceptions.Timeout:
+                        GLOBAL_LOCK.acquire()
+                        self.queue.put(file_tmp)
+                        GLOBAL_LOCK.release()
+                        break
                     if result:
                         GLOBAL_LOCK.acquire()
                         self.hash_dic[file_tmp][hash_alg] = result['hash']

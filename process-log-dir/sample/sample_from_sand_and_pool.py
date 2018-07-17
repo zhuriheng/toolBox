@@ -117,7 +117,7 @@ def _calculate_count(ClsRatio, categorys, Num=None):
 
 def checkEnoughImages(inputFileRoot, ClsCount_dict):
     """
-    check whether there is enough
+    check whether there is enough imageimageimage
         :param inputFileRoot: 
         :param ClsCount_dict: 
     """
@@ -222,7 +222,6 @@ def parse_args():
 
 
 args = parse_args()
-
 
 def main():
     actionFlag = args.actionFlag
