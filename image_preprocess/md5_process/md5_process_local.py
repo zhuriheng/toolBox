@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument(
         '-mv', '--move', help='whether to move the duplication image', action='store_true')
     # save md5 file 
-    #parser.add_argument('--md5_file', dest='md5_file')
+    parser.add_argument('--md5_file', dest='md5_file', action='store_true')
     return parser.parse_args()
 
 
@@ -91,12 +91,17 @@ def main():
             md5_imagaPath_dict[md5_key] = imagePath
     
     # 将md5值存储下来
-    #output = os.path.join(args.inputImagesPath, 'md5_train_val.json')
-    #output = args.md5_file
-    #write_json(md5_imagaPath_dict, output)
-    print(len(allImagesPathList))
-    print(len(md5_imagaPath_dict))
-    pass
+    if args.md5_file:
+        output = os.path.join(args.inputImagesPath, 'md5.json')
+        output = args.md5_file
+        write_json(md5_imagaPath_dict, output)
+        print("Generate %s with success" % (output))
+
+    print("Images number: %d" % (len(allImagesPathList)))
+    print("Duplication images number: %d " %
+          (len(allImagesPathList) - len(md5_imagaPath_dict)))
+    print("Images number after deduplication: %d " % (len(md5_imagaPath_dict)))
+
 
 if __name__ == '__main__':
     print 'Start processing'
