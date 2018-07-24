@@ -3,6 +3,7 @@ python caffe_image_classify.py  \
 --deploy lib/models/deploy.prototxt \
 --labels lib/labels.lst \
 --gpu 0 \
---img_list test_5.txt \
+--batch_size 8\
+--img_list data/images.lst \
 --root . \
 #--labels_corres lib/labels_correspond.lst
