@@ -163,7 +163,7 @@ def multiple_batch_process(net_cls, img_list, label_list):
 
         result_dict = OrderedDict()
         result_dict['Top-1 Index'] = index_list[-1]
-        result_dict['Top-1 Class'] = label_list[index_list[-1]]
+        result_dict['Top-1 Class'] = label_list[index_list[-1]].split(' ')[1]
         # avoid JSON serializable error
         result_dict['Confidence'] = [str(i) for i in list(output_prob)]
         lst_result.append(result_dict)
@@ -203,7 +203,7 @@ def generate_rg_results(dict_results, threshold, output):
             label["index"] = index
             label["score"] = prob
 
-            fo.write('%s%t%s\n' % (img_name, json.dumps([label])))
+            fo.write('%s\t%s\n' % (img_name, json.dumps([label])))
             
     print("Generate %s with success" % (output))
 
@@ -268,6 +268,31 @@ def process_img_urllist(url_list_path, prefix, net_cls, label_list, batch_size):
         dict_results[os.path.basename(url)] = dict_result
     return dict_results
 
+
+def copy_image(root, save_img_dir, img_name, new_name):
+    '''
+    
+    '''
+    # 图片的原始路径
+    img_path = os.path.join(root, img_name)
+    # 图片的目标路径
+    dest_path = os.path.join(save_img_dir, new_name)
+    # 复制图片
+    cmdStr = 'cp %s %s' % (img_path, dest_path)
+    result_flag = os.system(cmdStr)
+    print cmdStr
+
+
+def save_img(dict_results, root, save_img_dir):
+    for (img_name, results) in dict_results.iteritems():
+        label = results['Top-1 Class']
+        index = int(results['Top-1 Index'])
+        score = float(results['Confidence'][index])
+        score = str(round(score, 2))
+        new_name = label + '_' + score + '.jpg'
+        copy_image(root, save_img_dir, img_name, new_name)
+    pass
+
 def parse_arg():
     parser = argparse.ArgumentParser(description='caffe image classify')
     parser.add_argument('--weight', help='caffemodel', type=str, required=True)
@@ -283,7 +308,8 @@ def parse_arg():
     parser.add_argument('--root', help='data root for image', default=None, type=str, required=False)
     parser.add_argument('--url_list', help='input image url list', default=None, type=str, required=False)
     parser.add_argument('--prefix', help='prefix for image url', default=None, type=str, required=False)
-    
+    parser.add_argument('--save_img', help='save image with title = label_score.jpg', action='store_true')
+    parser.add_argument('--save_img_dir', help='save image directory', default=None, type=str, required=False)
     return parser.parse_args()
 
 def main():
@@ -325,6 +351,10 @@ def main():
     output = os.path.join(output_folder, 'results_%s.json' %
                           (now.strftime("%H%M%S")))
     
+    # 将推理图片存储
+    if args.save_img:
+        save_img(dict_results, args.root, args.save_img_dir)
+
     with open(output, 'w') as f:
         json.dump(dict_results, f, indent=4)
     print("Generate %s with success" % (output))
