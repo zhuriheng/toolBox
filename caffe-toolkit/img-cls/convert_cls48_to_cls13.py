@@ -104,6 +104,7 @@ def main():
         convert_infer_result(args.infer, label_corres_list)
 
     if args.gt:
+        # 48类到13类的类别映射表
         map = {'0': [0], '1': [1, 2, 3, 4], '2': [
             5, 6], '3': [7, 8], '4': [9, 10]}  # 暴恐5类
         for idx in range(11, 18):
@@ -112,8 +113,6 @@ def main():
         print map
         convert_ground_truth(args.gt, map)
         
-    
-
 
 if __name__ == '__main__':
     print('Start caffe image classify:')

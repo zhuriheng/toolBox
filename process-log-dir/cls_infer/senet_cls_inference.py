@@ -371,10 +371,10 @@ nohup python -u mp_refindeDet-res18-inference-demo.py \
 
 """
 python senet_cls_inference.py \
---urlfileName data/0409/test_url.list \
---modelBasePath /workspace/run/master/bk_cls_inference/models \
+--modelBasePath models \
 --modelName se-res50-hiv-v0.3-t2_iter_24000.caffemodel \
 --deployFileName deploy.prototxt \
 --labelFileName  labels.lst  \
---gpu_id 0
+--gpu_id 0 \
+--urlfileName data/url/url_100.lst 
 """
