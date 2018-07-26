@@ -4,6 +4,8 @@ import numpy as np
 import bcolz
 import os
 from scipy import spatial
+import time
+from glob2 import glob
 
 import argparse
 
@@ -40,14 +42,36 @@ class Distance(object):
 
 def parse_arg():
     parser = argparse.ArgumentParser(description='clas')
-    parser.add_argument('input', help='input points file', type=str, required=True)
-    parser.add_argument(
-        'output', help='output distance file, set <input>_distance.bc by default', type=str, default=None)
+    parser.add_argument('input', help='input points file', type=str, default=None)
     return parser.parse_args()
+
+
+def calculate(input, save_folder):
+    builder = Distance(input)
+    
+    file_name = os.path.split(input)[-1].split('.')[0]
+    output = os.path.join(save_folder, "%s_distance.bc" % (file_name))
+    
+    start = time.time()
+    builder.build_distance_file(output)
+    cost = time.time() - start
+    print("Create file successufully: %s, cost time: %f" % (output, cost))
 
 
 if __name__ == '__main__':
     args = parse_arg()
-    builder = Distance(args.input)
-    output = args.output if args.output else "%s_distance.bc" % (os.path.splitext(args.input)[0])
-    builder.build_distance_file(output)
+    if os.path.isfile(args.input):
+        dir = os.path.split(args.input)[0]
+        save_folder = os.path.join(dir, 'distance')
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+        calculate(args.input, save_folder)
+    elif os.path.isdir(args.input):
+        files = glob(args.input + '/*.bc')
+        save_folder = os.path.join(args.input, 'distance')
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+        for file in files:
+            calculate(file, save_folder)
+    else:
+        print("Please input valid input points file")
