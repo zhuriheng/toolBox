@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 
 from __future__ import print_function
 import argparse
@@ -57,7 +57,7 @@ def center_crop(img, crop_size):
     return img[yy:yy + crop_size, xx: xx + crop_size]
 
 
-def multiple_batch_process(net_cls, img_list, label_list, features):
+def multiple_batch_process(net_cls, img_list, label_list):
     global ERROR_IMG
 
     _t1 = time.time()
@@ -99,15 +99,13 @@ def multiple_batch_process(net_cls, img_list, label_list, features):
         result_dict['Top-1 Class'] = label_list[index_list[-1]].split(' ')[1]
         # avoid JSON serializable error
         result_dict['Confidence'] = [str(i) for i in list(output_prob)]
-        result_dict['feature'] = [str(i) for i in list(feature)]
+        result_dict['feature'] = feature  # [str(i) for i in list(feature)]
         lst_result.append(result_dict)
 
-        top1_class = label_list[index_list[-1]].split(' ')[1]
-        features[top1_class].append(feature)
     return lst_result
 
 
-def process_img_list(root, img_list_path, net_cls, label_list, batch_size, features):
+def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
     img_list = np.loadtxt(img_list_path, str, delimiter='\n')
     dict_results = OrderedDict()
 
@@ -121,7 +119,7 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size, featu
             img = cv2.imread(img_path)
             img_list.append(img)
         lst_result = multiple_batch_process(
-            net_cls, img_list, label_list, features)
+            net_cls, img_list, label_list)
         for i in range(len(lst_result)):
             dict_result = lst_result[i]
             img_path = os.path.join(root, batch[i].split(' ')[0])
@@ -130,7 +128,26 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size, featu
     return dict_results
 
 
-def save_features(features, feature_root):
+def post_process(dict_results):
+    '''
+    return features dict and label dict
+    '''
+    features = defaultdict()
+    img_dict = defaultdict()
+
+    for key, value in dict_results.items():
+        label = dict_results[key]['Top-1 Class']
+        img_dict[label].append(key)
+        features[label].append(dict_results[key]['feature'])
+    return features, img_dict
+        
+
+def save_features_imglist(features, img_dict, save_root):
+    '''
+    a. save image list: 
+        image_path  label_idx  
+    b. save features in bcolz
+    '''
     def RepresentsInt(s):
         '''判断字符串是否表示int'''
         try:
@@ -139,20 +156,26 @@ def save_features(features, feature_root):
         except ValueError:
             return False
 
-    if not os.path.exists(feature_root):
-        os.makedirs(feature_root)
-    print("Size of dictionary features: ",  sys.getsizeof(features))
+    if not os.path.exists(save_root):
+        os.makedirs(save_root)
 
     keys = features.keys()
     # 假如label的形式是 “index_labelname”(0_bk_bloodiness_human),则对index排序
     if RepresentsInt(keys[0].split('_')[0]):
         keys = sorted(keys, key=lambda k: int(k.split('_')[0]))
+
     for key in keys:
         print("*"*20, key, "*"*20)
-        file_name = os.path.join(feature_root, key + '.bc')
+        file_name = os.path.join(save_root, key + '.bc')
         save_array(file_name, features[key])
-        np.savetxt(os.path.join(feature_root, key + '.txt'), features[key])  #  fmt='%10.4f'
+        np.savetxt(os.path.join(save_root, key + '.txt'), features[key])  #  fmt='%10.4f'
         print("save features file successfully in %s" % (file_name))
+
+        img_list = os.path.join(save_root, key + '.lst')
+        with open(img_list, 'w') as f:
+            label_index = key.split("_")[0]
+            for img_name in img_dict[key]:
+                f.write(img_name + ' ' + label_index + '\n')
     
 
 def parse_arg():
@@ -168,7 +191,7 @@ def parse_arg():
                         default=None, type=str, required=False)
     parser.add_argument('--root', help='data root for image',
                         default=None, type=str, required=False)
-    parser.add_argument('--feature_root', type=str, default=None)
+    parser.add_argument('--save_root', type=str, default=None)
     return parser.parse_args()
 
 
@@ -183,17 +206,26 @@ def main():
     net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
     label_list = np.loadtxt(args.labels, str, delimiter='\n')
 
-    dict_results = OrderedDict()
+    
     # 字典，key: label, value: feature list
     features = defaultdict(list)
-    feature_root = args.feature_root if args.feature_root else 'features/%s/' % (
+    save_root = args.save_root if args.save_root else 'features/%s/' % (
         now.strftime("%Y%m%d%H%M%S"))
+
+
+    dict_results = OrderedDict()
     dict_results = process_img_list(
         args.root, args.img_list, net_cls, label_list, args.batch_size, features)
-    save_features(features, feature_root)
+
+    features, img_dict = post_process(dict_results)
+    save_features_imglist(features, img_dict, save_root)
 
     output = os.path.join(output_folder, 'results_%s.json' %
                           (now.strftime("%H%M%S")))
+    
+    for key in dict_results.keys():
+        feature = dict_results[key]['feature']
+        dict_results[key].update({'feature': [str(i) for i in list(feature)]})
     with open(output, 'w') as f:
         json.dump(dict_results, f, indent=4)
     print("Generate %s with success" % (output))
