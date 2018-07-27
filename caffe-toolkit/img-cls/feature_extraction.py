@@ -205,17 +205,15 @@ def main():
 
     net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
     label_list = np.loadtxt(args.labels, str, delimiter='\n')
-
     
     # 字典，key: label, value: feature list
     features = defaultdict(list)
     save_root = args.save_root if args.save_root else 'features/%s/' % (
         now.strftime("%Y%m%d%H%M%S"))
 
-
     dict_results = OrderedDict()
     dict_results = process_img_list(
-        args.root, args.img_list, net_cls, label_list, args.batch_size, features)
+        args.root, args.img_list, net_cls, label_list, args.batch_size)
 
     features, img_dict = post_process(dict_results)
     save_features_imglist(features, img_dict, save_root)
