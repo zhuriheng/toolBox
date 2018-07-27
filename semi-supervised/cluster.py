@@ -155,7 +155,7 @@ class DensityPeakCluster(object):
             rho_b = [0.0] * (num + 1)
             for i in range(1, num):
                 for j in range(i + 1, num + 1):
-                    if cluster[i] != cluster[j] and distance[(i, j)] < dc:
+                    if cluster[i] != cluster[j] and distance[i-1, j-1] < dc:
                         rho_avg = (rho[i] + rho[j]) / 2
                         rho_b[cluster[i]] = max(rho_b[cluster[i]], rho_avg)
                         rho_b[cluster[j]] = max(rho_b[cluster[j]], rho_avg)

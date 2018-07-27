@@ -2,6 +2,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+plt.switch_backend('Agg')
 from cluster import *
 from sklearn import manifold
 import os
@@ -89,3 +90,4 @@ if __name__ == '__main__':
     output = os.path.join(dir, 'plot_rho_delta', '%s_%s.png' %
                           (name, now.strftime('%Y%m%d%H%M')))
     plot_rho_delta(rho, delta, output)
+    print("Save figure successfully: %s" % output)
