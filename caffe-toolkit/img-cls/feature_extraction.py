@@ -99,6 +99,7 @@ def multiple_batch_process(net_cls, img_list, label_list, features):
         result_dict['Top-1 Class'] = label_list[index_list[-1]].split(' ')[1]
         # avoid JSON serializable error
         result_dict['Confidence'] = [str(i) for i in list(output_prob)]
+        result_dict['feature'] = feature
         lst_result.append(result_dict)
 
         top1_class = label_list[index_list[-1]].split(' ')[1]

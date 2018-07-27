@@ -3,7 +3,7 @@
 import numpy as np
 import bcolz
 import os
-from scipy import spatial
+import scipy.spatial.distance as dis
 import time
 from glob2 import glob
 
@@ -23,19 +23,20 @@ class Distance(object):
         '''
         return np.linalg.norm(vec1 - vec2)
     
-    def euclidean_distance_set(self, XA, XB):
+    def euclidean_distance_set(self, X):
         '''
         Compute distance between each pair of the two collections of inputs.
         XA : An m_A by n array of m_A original observations in an n-dimensional space
         XA : An m_B by n array of m_B original observations in an n-dimensional space
         '''
-        return spatial.distance.cdist(XA, XB, 'euclidean')
+        Y = dis.pdist(X, 'euclidean')
+        return dis.squareform(Y)
 
     def build_distance_file(self, filename):
         '''
         Calculate distance, save the result for cluster
         '''
-        distance = self.euclidean_distance_set(self.vectors, self.vectors)
+        distance = self.euclidean_distance_set(self.vectors)
         c = bcolz.carray(distance, rootdir=filename, mode='w')
         c.flush()
 
@@ -55,7 +56,8 @@ def calculate(input, save_folder):
     start = time.time()
     builder.build_distance_file(output)
     cost = time.time() - start
-    print("Create file successufully: %s, cost time: %f" % (output, cost))
+    print("Create file successufully: %s" % (output))
+    print("images number: %d, cost time: %f" % (builder.vectors.shape[0], cost))
 
 
 if __name__ == '__main__':
