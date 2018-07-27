@@ -88,7 +88,7 @@ def multiple_batch_process(net_cls, img_list, label_list, features):
         if index > (len(img_list) - 1):
             continue
         output_prob = np.squeeze(output['prob'][index])
-        feature = np.squeeze(net_cls.blobs['pool5'].data[index, :]).reshape((2048))
+        feature = np.squeeze(net_cls.blobs['pool5'].data[index].copy()).reshape((2048))
 
         # sort index list & create sorted rate list
         index_list = output_prob.argsort()
@@ -99,7 +99,7 @@ def multiple_batch_process(net_cls, img_list, label_list, features):
         result_dict['Top-1 Class'] = label_list[index_list[-1]].split(' ')[1]
         # avoid JSON serializable error
         result_dict['Confidence'] = [str(i) for i in list(output_prob)]
-        result_dict['feature'] = feature
+        result_dict['feature'] = [str(i) for i in list(feature)]
         lst_result.append(result_dict)
 
         top1_class = label_list[index_list[-1]].split(' ')[1]
