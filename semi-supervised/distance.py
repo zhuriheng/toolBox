@@ -42,7 +42,7 @@ class Distance(object):
 
 
 def parse_arg():
-    parser = argparse.ArgumentParser(description='clas')
+    parser = argparse.ArgumentParser(description='calculate distance')
     parser.add_argument('input', help='input points file', type=str, default=None)
     return parser.parse_args()
 

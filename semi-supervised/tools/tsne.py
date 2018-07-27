@@ -206,13 +206,22 @@ if __name__ == "__main__":
     # label_file = "../data/dens_est/{}.lst".format(cls_id)
 
     label = '4_bk_bomb_self-burning'
+
+    #categorys = {}
+    #label_file = np.loadtxt("../lib/labels.lst")
+    #for line in label_file:
+    #    categ, idx = line.split(' ')
+    #    categorys[idx] = categ
+    
+    prefix = '/workspace/data/master/inference/bk_cls-se-res50-hik-v0.3/data/Terror-Classify-V0.33-180716/val/'
+
     list_file = "../feature/20180727225416/{}.lst".format(label)
-    feature_file = "../feature/20180727225416/distance/{}.bc".format(label)
+    feature_file = "../feature/20180727225416/distance/{}_distance.bc".format(label)
 
     with open(list_file, 'rb') as f:
         img_label_list = f.readlines()
 
-    image_list = [l.strip().split(' ')[0] for l in img_label_list]
+    image_list = [prefix + l.strip().split(' ')[0] for l in img_label_list]
     label_list = [l.strip().split(' ')[1] for l in img_label_list]
 
     loc_list = tsne_webvision(feature_file)
