@@ -19,9 +19,7 @@ import caffe
 
 
 def save_array(fname, arr):
-    print("Size of numpy: ", sys.getsizeof(arr))
     c = bcolz.carray(arr, rootdir=fname, mode='w')
-    print("Size of carray: ", sys.getsizeof(c))
     c.flush()
 
 def load_array(fname):
@@ -132,15 +130,15 @@ def post_process(dict_results):
     '''
     return features dict and label dict
     '''
-    features = defaultdict()
-    img_dict = defaultdict()
+    features = defaultdict(list)
+    img_dict = defaultdict(list)
 
     for key, value in dict_results.items():
         label = dict_results[key]['Top-1 Class']
         img_dict[label].append(key)
         features[label].append(dict_results[key]['feature'])
     return features, img_dict
-        
+    
 
 def save_features_imglist(features, img_dict, save_root):
     '''
@@ -168,7 +166,7 @@ def save_features_imglist(features, img_dict, save_root):
         print("*"*20, key, "*"*20)
         file_name = os.path.join(save_root, key + '.bc')
         save_array(file_name, features[key])
-        np.savetxt(os.path.join(save_root, key + '.txt'), features[key])  #  fmt='%10.4f'
+        # np.savetxt(os.path.join(save_root, key + '.txt'), features[key])  #  fmt='%10.4f'
         print("save features file successfully in %s" % (file_name))
 
         img_list = os.path.join(save_root, key + '.lst')
@@ -176,6 +174,7 @@ def save_features_imglist(features, img_dict, save_root):
             label_index = key.split("_")[0]
             for img_name in img_dict[key]:
                 f.write(img_name + ' ' + label_index + '\n')
+        print("save image list file successfully in %s" % (img_list))
     
 
 def parse_arg():
@@ -206,9 +205,7 @@ def main():
     net_cls = init_models(args.weight, args.deploy, args.batch_size, args.gpu)
     label_list = np.loadtxt(args.labels, str, delimiter='\n')
     
-    # 字典，key: label, value: feature list
-    features = defaultdict(list)
-    save_root = args.save_root if args.save_root else 'features/%s/' % (
+    save_root = args.save_root if args.save_root else 'feature/%s/' % (
         now.strftime("%Y%m%d%H%M%S"))
 
     dict_results = OrderedDict()
