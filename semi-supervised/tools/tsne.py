@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # label_file = "../data/denoised/{}.lst".format(cls_id)
     # label_file = "../data/dens_est/{}.lst".format(cls_id)
 
-    val = '20180728101223'  # val
+    val = '20180728101223'  
     train = '20180728111444'
     cls_idx  = 0
     save_figure_path = "../feature/{}/figure/".format(val)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     for cls_idx in range(48):
         list_file = glob("../feature/{}/{}_*.lst".format(val, cls_idx))[0]
         feature_file = glob("../feature/{}/{}_*.bc".format(val, cls_idx))[0]
-        label_name = os.path.splitext(feature_file)[0].split('/')[0]
+        label_name = feature_file.split('/')[-1].split('.')[0]
         figure_name = os.path.join(save_figure_path, label_name + '_pca.png')
 
         with open(list_file, 'rb') as f:
