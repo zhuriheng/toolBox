@@ -13,9 +13,9 @@
 
 import numpy as np
 import pylab as Plot
-import cPickle as pickle
+import os
 import bcolz
-
+from glob2 import glob
 from embed_img_plot import *
 
 
@@ -183,16 +183,23 @@ def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
     return Y
 
 
-def tsne_webvision(feature_file):
+def tsne_webvision(feature_file, tsne_or_pca = 'pca'):
     # print("Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on
     # your dataset.")
     print("Running on webvision image dataset...")
 
     X = bcolz.open(feature_file)[:]
     print("Total image number: {}".format(X.shape[0]))
-    # Y = tsne(X, 2, 50, 20.0)
-    Y = pca(X, 2).real
-
+    Y = None
+    try:
+        if tsne_or_pca == 'pca':
+            Y = pca(X, 2).real
+        elif tsne_or_pca == 'tsne':
+            Y = tsne(X, 2, 50, 20.0)
+        else:
+            print "Please choose tsne or pca method!!!"
+    except Exception, e:
+        print(Exception, ":", e)
     return Y
 
 
@@ -205,32 +212,32 @@ if __name__ == "__main__":
     # label_file = "../data/denoised/{}.lst".format(cls_id)
     # label_file = "../data/dens_est/{}.lst".format(cls_id)
 
-    label = '4_bk_bomb_self-burning'
+    val = '20180728101223'  # val
+    train = '20180728111444'
+    cls_idx  = 0
+    save_figure_path = "../feature/{}/figure/".format(val)
+    if not os.path.exists(save_figure_path):
+        os.makedirs(save_figure_path)
 
-    #categorys = {}
-    #label_file = np.loadtxt("../lib/labels.lst")
-    #for line in label_file:
-    #    categ, idx = line.split(' ')
-    #    categorys[idx] = categ
-    
-    prefix = '/workspace/data/master/inference/bk_cls-se-res50-hik-v0.3/data/Terror-Classify-V0.33-180716/val/'
+    for cls_idx in range(48):
+        list_file = glob("../feature/{}/{}_*.lst".format(val, cls_idx))[0]
+        feature_file = glob("../feature/{}/{}_*.bc".format(val, cls_idx))[0]
+        label_name = os.path.splitext(feature_file)[0].split('/')[0]
+        figure_name = os.path.join(save_figure_path, label_name + '_pca.png')
 
-    list_file = "../feature/20180727225416/{}.lst".format(label)
-    feature_file = "../feature/20180727225416/distance/{}_distance.bc".format(label)
+        with open(list_file, 'rb') as f:
+            img_label_list = f.readlines()
 
-    with open(list_file, 'rb') as f:
-        img_label_list = f.readlines()
+        image_list = [l.strip().split(' ')[0] for l in img_label_list]
+        label_list = [l.strip().split(' ')[1] for l in img_label_list]
 
-    image_list = [prefix + l.strip().split(' ')[0] for l in img_label_list]
-    label_list = [l.strip().split(' ')[1] for l in img_label_list]
-
-    loc_list = tsne_webvision(feature_file)
-    # np.save("../data/tsne_2d.npy", loc_list)
-
-    # loc_list = np.load("../data/tsne_2d.npy")
-
-    embed_image_plot(loc_list, image_list, label_list,
-                     with_border=False)
+        loc_list = tsne_webvision(feature_file, 'pca')
+        if isinstance(loc_list, np.ndarray):
+            embed_image_plot(loc_list, image_list, label_list,
+                             with_border=False, figure_name=figure_name)
+            print "Save figure successfully: %s" % figure_name
+        else:
+            print "Failed to save figure: %s" % figure_name
 
     # image_point_plot(loc_list, image_list,
     #                  label_file=label_file)

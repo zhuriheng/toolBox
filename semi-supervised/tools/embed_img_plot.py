@@ -46,7 +46,7 @@ def image_point_plot(loc_list, image_list,
 
 def embed_image_plot(loc_list, image_list, label_list=None,
                      size=(64, 64), figsize=(20, 20),
-                     with_border=False):
+                     with_border=False, figure_name='embed_image.jpg'):
     fig, ax = plt.subplots(figsize=figsize)
     xmin, xmax = min(loc_list[:, 0]), max(loc_list[:, 0])
     ymin, ymax = min(loc_list[:, 1]), max(loc_list[:, 1])
@@ -85,6 +85,6 @@ def embed_image_plot(loc_list, image_list, label_list=None,
     ax.set_ylim(2 * ymin, 2 * ymax)
 
     plt.tight_layout()
-    plt.show()
+    #plt.show()
     plt.axis("off")
-    plt.savefig("embed_image.jpg", dpi=1200)
+    plt.savefig(figure_name, dpi=1200)

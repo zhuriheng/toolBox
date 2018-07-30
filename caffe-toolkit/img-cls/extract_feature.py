@@ -135,7 +135,7 @@ def post_process(dict_results):
 
     for key, value in dict_results.items():
         label = dict_results[key]['Top-1 Class']
-        img_dict[label].append(key)
+        img_dict[label].append(dict_results[key]['File Name'])
         features[label].append(dict_results[key]['feature'])
     return features, img_dict
     
