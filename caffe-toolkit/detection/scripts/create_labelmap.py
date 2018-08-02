@@ -15,20 +15,21 @@ from collections import OrderedDict
 def parse_arg():
     parser = argparse.ArgumentParser(
         description='Create labelmap.prototxt from label list for LMDB')
-    parser.add_argument('label_list', help='label_list, e.g: 0 Sweatpants')
+    parser.add_argument(
+        'label_list', help='label_list, e.g: 1 Sweatpants, label index should start from 1')
     return parser.parse_args()
 
 def create_item(name, label, display_name):
     """
     labelmap.prototxt format:
     e.g:    item {
-                name: "none_of_the_above"G
+                name: "none_of_the_above"
                 label: 0
                 display_name: "background"
             }
     
         :param name: str, label name
-        :param label: str, label index
+        :param label: int, label index
         :param display_name: str, label display_name
     """
     item = OrderedDict()
@@ -42,23 +43,24 @@ def create_item(name, label, display_name):
 
 def main():
     args = parse_arg()
-    labels = OrderedDict()
+    labels = []
+    # label index should start from 1
     with open (args.label_list, 'r') as fi:
         for line in fi:
             index, label = line.strip().split()
-            labels[int(index)] = label
+            labels.append(label)
     
     abspath = os.path.abspath(args.label_list)
     output = os.path.join(os.path.split(abspath)[0], 'labelmap.prototxt')
     with open(output, 'w') as fo:
-        for key in labels.keys():
-            item = create_item(labels[key], key, labels[key])
-            fo.write('%s %s\n' % ('item', item))
         # add background item
-        num = len(labels.keys())
         item = create_item(
-            "none_of_the_above", num, 'background')
+            "none_of_the_above", 0, 'background')
         fo.write('%s %s\n' % ('item', item))
+    
+        for i in range(len(labels)):
+            item = create_item(labels[i], i+1, labels[i])
+            fo.write('%s %s\n' % ('item', item))
     
     print("save file successfully: %s" % (output))
 
