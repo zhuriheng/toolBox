@@ -240,18 +240,6 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
             dict_results[os.path.basename(img_path)] = dict_result
     return dict_results
 
-"""     for i in range(len(img_list)):
-        start_time = time.time()
-        img_path = os.path.join(root, img_list[i].split(' ')[0])
-        img = cv2.imread(img_path)
-        dict_result = single_img_process(net_cls, img, label_list)
-        end_time = time.time()
-        print('Inference speed: {:.3f}s / iter'.format(end_time - start_time))
-        dict_result.update({'File Name': img_path})
-        dict_results[os.path.basename(img_path)] = dict_result
-    return dict_results """
-
-
 def process_img_urllist(url_list_path, prefix, net_cls, label_list, batch_size):
     url_list = np.loadtxt(url_list_path, str, delimiter='\n')
     dict_results = OrderedDict()
