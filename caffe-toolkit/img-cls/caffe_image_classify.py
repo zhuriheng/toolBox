@@ -1,4 +1,10 @@
 #coding=utf-8
+'''
+In this example, we will load a RefineDet model and use it to detect objects.
+
+Todo:
+    - support multiple GPU inference (multi-process)
+'''
 
 import argparse
 import json
@@ -248,7 +254,7 @@ def process_img_urllist(url_list_path, prefix, net_cls, label_list, batch_size):
         start_time = time.time()
         img = urllib.urlopen(url).read()
         img = np.fromstring(img, np.uint8)
-        img = cv2.imread(img, 1)
+        img = cv2.imdecode(img, 1)
         dict_result = single_img_process(net_cls, img, label_list)
         end_time = time.time()
         print('Inference speed: {:.3f}s / iter'.format(end_time - start_time))
