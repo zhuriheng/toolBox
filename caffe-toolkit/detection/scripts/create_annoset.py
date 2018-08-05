@@ -13,6 +13,10 @@ sys.path.append("../caffe/python")
 from caffe.proto import caffe_pb2
 from google.protobuf import text_format
 
+# get caffe root directory
+caffe_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+caffe_root = os.path.join(caffe_root, 'caffe')
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
       description="Create AnnotatedDatum database")
@@ -123,8 +127,6 @@ if __name__ == "__main__":
   if os.path.exists(out_dir):
     shutil.rmtree(out_dir)
 
-  # get caffe root directory
-  caffe_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
   if anno_type == "detection":
     cmd = "{}/build/tools/convert_annoset" \
         " --anno_type={}" \
