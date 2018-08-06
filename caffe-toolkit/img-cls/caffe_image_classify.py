@@ -1,11 +1,12 @@
 #coding=utf-8
 '''
-In this example, we will load a RefineDet model and use it to detect objects.
+Version:
+    - V1.1 support url list inference with multiple batch 
 
 Todo:
-    - support multiple GPU inference (multi-process)
+    - support multiple GPU inference (multi-process) 
+    - add 
 '''
-
 import argparse
 import json
 import os
@@ -131,7 +132,7 @@ def single_img_process(net_cls, img, label_list):
 
 def multiple_batch_process(net_cls, img_list, label_list):
     global ERROR_IMG
-
+    num_img = len(img_list)
     _t1 = time.time()
     for index, img in enumerate(img_list):
         try:
@@ -147,12 +148,12 @@ def multiple_batch_process(net_cls, img_list, label_list):
             continue
         net_cls.blobs['data'].data[index] = img
     _t2 = time.time()
-    print("Preprocess and load image to net: %f", _t2 - _t1)
+    print("Preprocess and load image to net: %f (per image)", (_t2 - _t1)*1.0/num_img)
 
     _t1 = time.time()
     output = net_cls.forward()
     _t2 = time.time()
-    print("forward: %f", _t2 - _t1)
+    print("forward: %f (per image)", (_t2 - _t1)*1.0/num_img)
 
     lst_result = list()
     for index, output_prob in enumerate(output['prob']):
@@ -249,17 +250,24 @@ def process_img_list(root, img_list_path, net_cls, label_list, batch_size):
 def process_img_urllist(url_list_path, prefix, net_cls, label_list, batch_size):
     url_list = np.loadtxt(url_list_path, str, delimiter='\n')
     dict_results = OrderedDict()
-    for i in range(len(url_list)):
-        url = prefix + url_list[i] if prefix else url_list[i]
-        start_time = time.time()
-        img = urllib.urlopen(url).read()
-        img = np.fromstring(img, np.uint8)
-        img = cv2.imdecode(img, 1)
-        dict_result = single_img_process(net_cls, img, label_list)
-        end_time = time.time()
-        print('Inference speed: {:.3f}s / iter'.format(end_time - start_time))
-        dict_result.update({'File Name': url})
-        dict_results[os.path.basename(url)] = dict_result
+
+    batches = [url_list[i:i + batch_size]
+               for i in xrange(0, len(url_list), batch_size)]  # for py3: range()
+    
+    for batch in batches:
+        img_list = []
+        for i in range(len(batch)):
+            url = prefix + batch[i] if prefix else batch[i]
+            img = urllib.urlopen(url).read()
+            img = np.fromstring(img, np.uint8)
+            img = cv2.imdecode(img, 1)
+            img_list.append(img)
+        lst_result = multiple_batch_process(net_cls, img_list, label_list)
+        for i in range(len(lst_result)):
+            dict_result = lst_result[i]
+            url = prefix + batch[i] if prefix else batch[i]
+            dict_result.update({'File Name': url})
+            dict_results[os.path.basename(url)] = dict_result
     return dict_results
 
 
