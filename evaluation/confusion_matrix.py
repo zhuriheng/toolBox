@@ -1,4 +1,11 @@
 #coding=utf-8
+'''
+Make confusion matrix.
+Created by Riheng 08/05/2018
+
+Todo:
+    - support getting classes with automatique.
+'''
 
 import json
 import os

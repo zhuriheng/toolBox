@@ -135,6 +135,7 @@ def get_label_from_directory(imagePath):
     '''
     通过文件路径获得图片的label信息
     '''
+    print imagePath
     label = None
     return label
 
@@ -150,7 +151,7 @@ def request_label(cls=None, index=None):
             return False
 
 
-def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_from_imgname, label_from_directory, dataset_label):
+def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_from_imgname, dataset_label):
     json_lists = []
     for imagePath in imagesPathList:
         url = imagePath.split('/')[-nb_prefix:]
@@ -161,11 +162,11 @@ def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_
         cls = None
         if with_label:
             if label_from_imgname:
-                cls = get_label_from_imgname(img_name)
-            elif label_from_directory:
-                cls = get_label_from_directory(imagePath)
-                print("暂不支持")
-                exit()
+            cls = get_label_from_imgname(img_name)
+            #elif label_from_directory:
+            #    cls = get_label_from_directory(imagePath)
+            #    print("暂不支持")
+            #    exit()
             else:
                 cls = get_label_from_labelfile(img_name)
                 print("暂不支持")
@@ -198,10 +199,10 @@ def process_detection(imagesPathList, nb_prefix, prefix, with_label, dataset_lab
 def create_from_images():
     allImagesPathList = getAllImages(basePath=args.inputImagesPath)
     
-    if args.dataTypeFlag == 'det':
+    if args.dataTypeFlag == 'cls':
         json_lists = process_classification(
-            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.label_from_imgname, args.label_from_directory, args.dataset_label)
-    elif args.dataTypeFlag == 'cls':
+            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.label_from_imgname, args.dataset_label)
+    elif args.dataTypeFlag == 'det':
         json_lists = process_detection(
             allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.dataset_label)
     

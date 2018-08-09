@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
 Loading results of ocr and visualization the bounding box and txt.
+
+Todo:
+    - fix bug of cv2.putText chinese character 
 '''
 import json
 import os
