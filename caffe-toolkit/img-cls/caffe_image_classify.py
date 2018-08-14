@@ -5,7 +5,6 @@ Version:
 
 Todo:
     - support multiple GPU inference (multi-process) 
-    - add 
 '''
 import argparse
 import json
@@ -19,7 +18,7 @@ import cv2
 import numpy as np
 import urllib
 
-sys.path.insert(0, 'caffe/python')
+sys.path.insert(0, 'opt/caffe/python')
 import caffe
 
 
@@ -203,7 +202,6 @@ def generate_rg_results(dict_results, threshold, output):
             [cls_name] = [labels[int(key)] for key in map.keys() if index in map[key]]
             # 暴恐分类目前的线上逻辑: 只有类别是非normal，并且score小于0.9的才被标为review
             if prob < threshold and cls_name != 'normal':
-                cls_name = 'normal'
                 index = -1
 
             label["class"] = cls_name

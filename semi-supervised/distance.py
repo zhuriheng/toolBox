@@ -1,4 +1,13 @@
 #-*- coding: utf-8 -*-
+'''
+Version:
+    - V1.0 using scipy.spatial.distance.pdist(n, 'euclidean') to save calculation time
+           using bcolz to save memory 
+    - V1.1 support multiple process with concurrent.futures package
+
+Todo:
+    - support ...
+'''
 
 import numpy as np
 import bcolz
@@ -6,6 +15,8 @@ import os
 import scipy.spatial.distance as dis
 import time
 from glob2 import glob
+from functools import partial
+from concurrent.futures import ProcessPoolExecutor
 
 import argparse
 
@@ -73,7 +84,14 @@ if __name__ == '__main__':
         save_folder = os.path.join(args.input, 'distance')
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
-        for file in files:
-            calculate(file, save_folder)
+        
+        start = time.time()
+        # Nonparallel code
+        # for file in files:
+        #     calculate(file, save_folder)
+        # Parallel implementation
+        with ProcessPoolExecutor() as pool:
+            pool.map(partial(calculate, save_folder=save_folder), files)
+        print("Total cost time: %f" % (time.time() - start))
     else:
         print("Please input valid input points file")
