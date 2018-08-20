@@ -3,6 +3,9 @@
 Make confusion matrix.
 Created by Riheng 08/05/2018
 
+Version:
+    - V1.1 add seaborn.heatmap
+
 Todo:
     - support getting classes with automatique.
 '''
@@ -11,6 +14,7 @@ import json
 import os
 import argparse
 from collections import Counter
+import seaborn as sns
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,6 +37,17 @@ def load_lst(path):
             dic[key] = value
     return dic
 
+
+def sns_heatmap(cm, classes, title='Confusion matrix', cmap=plt.cm.Greens):
+    fig, ax = plt.subplots(1)
+    ax = sns.heatmap(cm, ax=ax, cmap=cmap, annot=True, fmt='g')
+    ax.set_xticklabels(classes, rotation=40, ha='right')
+    ax.set_yticklabels(classes, rotation=0)
+    plt.title(title)
+    plt.ylabel('True class')
+    plt.xlabel('Predicted class')
+    fig.savefig('Confusion matrix.png', dpi=300)
+    plt.show()
 
 def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues, figsize=None):
     """
@@ -93,6 +108,7 @@ def main():
     print(precison_recall)
     # 3.plot confusion matrix
     cm = confusion_matrix(y, preds, labels=np.arange(len(classes)))
+    sns_heatmap(cm, classes)
     plot_confusion_matrix(cm, classes, normalize=False)
 
 
