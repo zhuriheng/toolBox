@@ -39,7 +39,7 @@ def checkValidImages(filePath):
         img = cv2.imread(filePath)
     except:
         img = None
-    if np.shape(img) == ():
+    if np.shape(img) == () or np.shape(img)[2] == 4:
         print("ERROR INFO : %s can't read" % (filePath))
         return False
     return True

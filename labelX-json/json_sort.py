@@ -6,6 +6,7 @@ import os
 import argparse
 import sys
 import json
+import pprint
 
 from collections import Counter, defaultdict
 
@@ -83,7 +84,7 @@ def labels_cls_analyse(json_lists):
               if json_list['label']
               if json_list['label'][0]['data']]
     # 统计labels的类别信息
-    print Counter(labels).most_common()
+    pprint.pprint(Counter(labels).most_common())
 
     # 返回各个类别的json list
     label_lists = defaultdict(list)

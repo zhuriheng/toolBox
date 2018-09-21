@@ -2,9 +2,19 @@
 # created 2018/04/13 @Riheng
 # 生成图片分类和检测的jsonlist
 
+'''
+Version:
+    - V1.1 09/03/18 support get_label_from_directory and get_label_from_imgname,
+        with support of cfg.py.
+    
+Todo:
+    - 
+'''
+
 import os
 import json
 import argparse
+from cfg import CATEGORYS
 
 '''
 dataTypeFlag : 数据类型  cls 分类  det 检测 
@@ -127,7 +137,13 @@ def get_label_from_imgname(imgname):
     '''
     通过文件名获得图片的label信息
     '''
-    label = imgname.split('_0227_')[0]
+    label = None
+    for CATEGORY in CATEGORYS:
+        if CATEGORY in imgname:
+            label = CATEGORY
+            break
+    if not label:
+        print("<Warning> not found label: {}".format(imgname))
     return label
 
 
@@ -135,8 +151,13 @@ def get_label_from_directory(imagePath):
     '''
     通过文件路径获得图片的label信息
     '''
-    print imagePath
     label = None
+    for CATEGORY in CATEGORYS:
+        if CATEGORY in imgname:
+            label = CATEGORY
+            break
+    if not label:
+        print("<Warning> not found label: {}".format(imgname))
     return label
 
 
@@ -151,7 +172,7 @@ def request_label(cls=None, index=None):
             return False
 
 
-def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_from_imgname, dataset_label):
+def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_from_imgname, label_from_directory, dataset_label):
     json_lists = []
     for imagePath in imagesPathList:
         url = imagePath.split('/')[-nb_prefix:]
@@ -162,11 +183,9 @@ def process_classification(imagesPathList, nb_prefix, prefix, with_label, label_
         cls = None
         if with_label:
             if label_from_imgname:
-            cls = get_label_from_imgname(img_name)
-            #elif label_from_directory:
-            #    cls = get_label_from_directory(imagePath)
-            #    print("暂不支持")
-            #    exit()
+                cls = get_label_from_imgname(img_name)
+            elif label_from_directory:
+                cls = get_label_from_directory(imagePath)
             else:
                 cls = get_label_from_labelfile(img_name)
                 print("暂不支持")
@@ -201,7 +220,7 @@ def create_from_images():
     
     if args.dataTypeFlag == 'cls':
         json_lists = process_classification(
-            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.label_from_imgname, args.dataset_label)
+            allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.label_from_imgname, args.label_from_directory, args.dataset_label)
     elif args.dataTypeFlag == 'det':
         json_lists = process_detection(
             allImagesPathList, args.nb_prefix, args.prefix, args.with_label, args.dataset_label)
@@ -265,6 +284,9 @@ def parse_args():
         action='store_true')
     parser.add_argument(
         '--label_from_imgname', help='optional 设置后从图片名获取label信息',
+        default=False, type=bool, choices=[True, False])
+    parser.add_argument(
+        '--label_from_directory', help='optional 设置后从图片路径名获取label信息',
         default=False, type=bool, choices=[True, False])
     parser.add_argument('--labels', type=str,
                         help='类别信息，包含类别名以及对应的index 的labels.lst文件')
