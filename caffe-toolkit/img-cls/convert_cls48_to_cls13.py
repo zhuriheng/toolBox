@@ -59,11 +59,7 @@ def convert_infer_result(infer_result, labels_corres):
     """
     dict_results = dict()
     with open(infer_result, 'r') as f:
-        for line in f:
-            result = json.loads(line)
-            img_name = result.keys()[0]
-            result = result.values()[0]
-            dict_results[img_name] = result
+        dict_results = json.load(f)
 
     label_corres_list = np.loadtxt(labels_corres, str, delimiter='\n')
     dict_results = label_correspond(label_corres_list, dict_results)
