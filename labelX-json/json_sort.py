@@ -2,6 +2,15 @@
 # created 2018/06/05 @Riheng
 # 解析json文件，并实现个性化的需求
 
+'''
+Version:
+    - V1.1 06/05/18 initialization
+    - V1.2 10/09/18 support sort strings and add notice of output file path
+    
+Todo:
+    - 
+'''
+
 import os
 import argparse
 import sys
@@ -121,9 +130,12 @@ def main():
         # 假如label的形式是 “index_labelname”(0_bk_bloodiness_human),则对index排序
         if RepresentsInt(keys[0].split('_')[0]):
             keys = sorted(keys, key=lambda k: int(k.split('_')[0]))
+        else:
+            keys = sorted(keys, key=lambda k: k)
         sort_label_lists = [label_list for key in keys
                             for label_list in label_lists[key]]
         write_to_json(sort_label_lists, output_json)
+        print('Save file : {}'.format(output_json))
     elif args.dataTypeFlag == 'det':
         print "暂未支持检测的json排序"
     pass
